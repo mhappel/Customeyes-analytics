@@ -11,6 +11,8 @@ styles = [
     'm.-',
     'c.-',
 ]
+#TO DO: indicate number of records next to series
+
 def pieplot(stats, title, data_label=None):
     labels = list()
     sizes = list()

@@ -37,29 +37,28 @@ bar_series = ["Recruitment process","Degree difficulty interviews", "Fast applic
 
 barx_series = ["Rejection Reason", "Source", "Completion status", "Degree difficulty interviews"] 
 
-  
-class GraphWindow(wx.Frame):
-    #Popup window for parameters (and graph)
+#Popup window for parameters (and graph)
+class Base_GraphWindow(wx.Frame):
+
+    panel = None
 
     def __init__(
             self, parent, ID, title, button_id, pos=wx.DefaultPosition,
             size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE
             ):
         
-        super(GraphWindow, self).__init__(parent, ID, title, pos, size, style)
+        super(Base_GraphWindow, self).__init__(parent, ID, title, pos, size, style)
         self.button_id = button_id
-        panel = wx.Panel(self, -1)
-        instruction = wx.StaticText(panel, -1, "Choose parameters for the graph", (15, 8))
+
+        self.panel = wx.Panel(self, -1)
+        instruction = wx.StaticText(self.panel, -1, "Choose parameters for the graph", (15, 8))
         instruction.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-        
-        choices = ['By Application Date', 'By Rejection Date']
-        self.datesch = wx.Choice(panel, -1, (15, 35), choices = choices)
-        self.datesch.SetSelection(0)
-        self.Bind(wx.EVT_CHOICE, self.on_parameter_change, self.datesch)
-        
+
+    def create_date_select(self, base_y):
+       
         month_choices = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-        wx.StaticText(panel, -1, "Select Start Month:", (15, 75))
-        self.startmonthch = wx.Choice(panel, -1, (125, 70), choices = month_choices)
+        wx.StaticText(self.panel, -1, "Select Start Month:", (15, base_y + 5))
+        self.startmonthch = wx.Choice(self.panel, -1, (125, base_y), choices = month_choices)
         self.startmonthch.SetSelection(10)
         self.Bind(wx.EVT_CHOICE, self.on_parameter_change, self.startmonthch)
         
@@ -71,45 +70,57 @@ class GraphWindow(wx.Frame):
             year_choices.append(str(year))
             year += 1
             
-        #wx.StaticText(panel, -1, "Select Start Date:", (15, 95))
-        self.startyearch = wx.Choice(panel, -1, (220, 70), choices = year_choices)
+        self.startyearch = wx.Choice(self.panel, -1, (220, base_y), choices = year_choices)
         self.startyearch.SetSelection(0)
         self.Bind(wx.EVT_CHOICE, self.on_parameter_change, self.startyearch)
         
-        wx.StaticText(panel, -1, "Select End Month:", (15, 110))
-        self.endmonthch = wx.Choice(panel, -1, (125, 105), choices = month_choices)
+        wx.StaticText(self.panel, -1, "Select End Month:", (15, base_y + 40))
+        self.endmonthch = wx.Choice(self.panel, -1, (125, base_y + 35), choices = month_choices)
         self.endmonthch.SetSelection(end_date.month -1)
         self.Bind(wx.EVT_CHOICE, self.on_parameter_change, self.endmonthch)
         
-        #wx.StaticText(panel, -1, "Select:", (15, 95))
-        self.endyearch = wx.Choice(panel, -1, (220, 105), choices = year_choices)
+        self.endyearch = wx.Choice(self.panel, -1, (220, base_y + 35), choices = year_choices)
         self.endyearch.SetSelection(end_date.year - 2016)
         self.Bind(wx.EVT_CHOICE, self.on_parameter_change, self.endyearch)
-        
+
+#TO DO: to redraw graph
+    def on_parameter_change(self, event):
+        print "Check!"
+ 
+
+class Line_Hbar_GraphWindow(Base_GraphWindow):
+    #Popup window for parameters (and graph)
+
+    def __init__(self, parent, ID, title, button_id, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE):
+        super(Line_Hbar_GraphWindow, self).__init__(parent, ID, title, button_id, pos, size, style)
+
+        choices = ['By Application Date', 'By Rejection Date']
+        self.datesch = wx.Choice(self.panel, -1, (15, 35), choices = choices)
+        self.datesch.SetSelection(0)
+        self.Bind(wx.EVT_CHOICE, self.on_parameter_change, self.datesch)
+
+        self.create_date_select(70)
+
         if self.button_id < 200:
             self.roles = ["All"] + app.roles
         else:
             self.roles = app.roles
 
         if self.button_id > 200 or len(line_series[self.button_id - 101]) == 1:        
-            self.rolelb = wx.CheckListBox(panel, -1, (15,140), (450,150), self.roles)
+            self.rolelb = wx.CheckListBox(self.panel, -1, (15,140), (450,150), self.roles)
             self.Bind(wx.EVT_CHECKLISTBOX, self.on_role_select, self.rolelb)
-            self.rolelb.SetChecked([0])
+            self.rolelb.SetCheckedItems([0])
         else:
-            self.rolelb = wx.ListBox(panel, -1, (15,140), (450,150), self.roles, wx.LB_SINGLE)
+            self.rolelb = wx.ListBox(self.panel, -1, (15,140), (450,150), self.roles, wx.LB_SINGLE)
             self.Bind(wx.EVT_LISTBOX, self.on_parameter_change, self.rolelb)
             self.rolelb.SetSelection(0)
         
         if self.button_id > 200:
-            publishbtn = wx.Button(panel, -1, "Show Chart", (15,320))
+            publishbtn = wx.Button(self.panel, -1, "Show Chart", (15,320))
             self.Bind(wx.EVT_BUTTON, self.On_publish_hbar_chart, publishbtn)
         else:
-            publishbtn = wx.Button(panel, -1, "Show Graph", (15,320))
+            publishbtn = wx.Button(self.panel, -1, "Show Graph", (15,320))
             self.Bind(wx.EVT_BUTTON, self.on_publish_graph, publishbtn)
-
-        #later to redraw graph
-    def on_parameter_change(self, event):
-        print "Check!"
 
     def on_role_select(self,event):
         if self.button_id > 200:
@@ -117,7 +128,7 @@ class GraphWindow(wx.Frame):
         else:
             max_choice = 6
         
-        if len(self.rolelb.GetChecked()) > max_choice:
+        if len(self.rolelb.GetCheckedItems()) > max_choice:
             self.rolelb.Check(event.GetSelection(),False)
             max_alert = "{:} {:} {:}".format("Cannot select more than", max_choice, "items") 
             dlg = wx.MessageDialog(self, max_alert, 'Alert', wx.OK | wx.ICON_EXCLAMATION)                              
@@ -152,7 +163,7 @@ class GraphWindow(wx.Frame):
         if len(series) == 1:
             selected_roles = list()
             title = self.GetLabel()
-            for role_idx in self.rolelb.GetChecked():
+            for role_idx in self.rolelb.GetCheckedItems():
                 if role_idx == 0:
                     selected_roles.append(None)
                 else:
@@ -193,12 +204,7 @@ class GraphWindow(wx.Frame):
 
     def On_publish_hbar_chart(self,event):
         #score_column_name = 'Degree difficulty interviews'
-        
-        if self.datesch.GetSelection() == 0:
-            date_column_name = "Application Date"
-        else:  
-            date_column_name = "Rejection Date"
-        
+             
         start_year = int(self.startyearch.GetStringSelection())
         start_month = self.startmonthch.GetSelection() + 1
         start_date = datetime.date(start_year, start_month, 1)
@@ -215,11 +221,11 @@ class GraphWindow(wx.Frame):
         
         selected_roles = list()
         title = self.GetLabel()
-        for role_idx in self.rolelb.GetChecked():
+        for role_idx in self.rolelb.GetCheckedItems():
             selected_roles.append(self.roles[role_idx])
 
         score_column_name = bar_series[self.button_id - 201]
-        stats = customeyes.hbar_role_averages(app.data, score_column_name = score_column_name, role_titles = selected_roles)
+        stats = customeyes.hbar_role_averages(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_titles = selected_roles)
         
         has_data = False
         
@@ -231,15 +237,75 @@ class GraphWindow(wx.Frame):
             dlg.ShowModal()
             dlg.Destroy()
 
+class Bar_GraphWindow(Base_GraphWindow):
+
+    def __init__(self, parent, ID, title, button_id, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE):
+        super(Bar_GraphWindow, self).__init__(parent, ID, title, button_id, pos, size, style)
+
+        self.create_date_select(35)    
+
+        choices = ['By Source', 'By Completion Status']
+        self.datesch = wx.Choice(self.panel, -1, (15, 105), choices = choices)
+        self.datesch.SetSelection(0)
+        self.Bind(wx.EVT_CHOICE, self.on_parameter_change, self.datesch) 
+      
+        self.roles = ["All"] + app.roles
+
+        self.rolelb = wx.ListBox(self.panel, -1, (15,140), (450,150), self.roles, wx.LB_SINGLE)
+        self.Bind(wx.EVT_LISTBOX, self.on_parameter_change, self.rolelb)
+        self.rolelb.SetSelection(0)
+        
+        publishbtn = wx.Button(self.panel, -1, "Show Chart", (15,320))
+        self.Bind(wx.EVT_BUTTON, self.On_publish_bar_chart, publishbtn)
+
+    def On_publish_bar_chart(self, event):
             
+        date_column_name = "Application Date"
+        
+        start_year = int(self.startyearch.GetStringSelection())
+        start_month = self.startmonthch.GetSelection() + 1
+        start_date = datetime.date(start_year, start_month, 1)
+
+        end_year = int(self.endyearch.GetStringSelection())
+        end_month = self.endmonthch.GetSelection() + 1
+        end_date = datetime.date(end_year, end_month, 1)        
+        
+        if start_date > end_date:
+            dlg = wx.MessageDialog(self, "Cannot select End Date before Start Date.", 'Alert', wx.OK | wx.ICON_EXCLAMATION)                              
+            dlg.ShowModal()
+            dlg.Destroy()
+            return
+        
+        title = self.GetLabel()
+        role_idx = self.rolelb.GetSelection()
+        if role_idx == 0:
+            role_title = None
+            title = "{:} {:}".format(self.GetLabel(), "All Roles")
+        else:
+            role_title = app.roles[role_idx]
+            title = "{:} {:}".format(self.GetLabel(), role_title)
+
+        score_column_name = bar_series[self.button_id - 207] #change button ID
+        stats = customeyes.barchart_average_scores(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_title = role_title)
+        
+        has_data = False
+        
+        if len(stats) > 0:
+            customeyes.draw_barplot(stats, score_column_name, title)
+            customeyes_plots.plt.show() 
+        else:
+            dlg = wx.MessageDialog(self, "No data available", 'Alert', wx.OK | wx.ICON_EXCLAMATION)                              
+            dlg.ShowModal()
+            dlg.Destroy()
+
 class MyFrame(wx.Frame):
     """
     This is MyFrame.  It just shows a few controls on a wxPanel,
     and has a simple menu.
     """
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, -1, title,
-                          pos=(150, 150), size=(700, 650))
+
+        super(MyFrame, self).__init__(parent, -1, title, pos=(150, 150), size=(700, 650))
 
         # Create the menubar
         menuBar = wx.MenuBar()
@@ -297,7 +363,18 @@ class MyFrame(wx.Frame):
         fastiv2btn = wx.Button(panel1, 203, "Fast application process")
         self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, fastiv2btn)
 
-      
+        #vertical bar charts per role
+        text_corr = wx.StaticText(panel2, -1, "Bar Charts by Role")
+        text_corr.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+        text_corr.SetSize(text_corr.GetBestSize())
+        barprocbtn = wx.Button(panel2, 207, "Averages Recruitment process scores")
+        self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barprocbtn)
+        bardifbtn = wx.Button(panel2, 208, "Averages Difficulty Interviews")
+        self.Bind(wx.EVT_BUTTON, self.OnBarGraph, bardifbtn)
+        barfstbtn = wx.Button(panel2, 209, "Average scores speed process")
+        self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barfstbtn) 
+
+        #standalone graphs
         text_role = wx.StaticText(panel2, -1, "Standalone graphs") #need to make per role as well
         text_role.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_role.SetSize(text_role.GetBestSize())
@@ -307,23 +384,6 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.month_score_dist, scoredistbtn)
         statusbtn = wx.Button(panel2, 206, "Distribution Rejected, Offered & Hired")
         self.Bind(wx.EVT_BUTTON, self.completion_status, statusbtn)
-        
-        #  #graphs by role
-        text_corr = wx.StaticText(panel2, -1, "Bar Graphs by Role")
-        text_corr.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-        text_corr.SetSize(text_role.GetBestSize())
-        sourcebtn = wx.Button(panel2, 207, "Average Recruitment process scores by Source")
-        self.Bind(wx.EVT_BUTTON, self.OnBarGraph, sourcebtn)
-        cmplstatusbtn = wx.Button(panel2, 208, "Average Recruitment process scores by Completion status")
-        self.Bind(wx.EVT_BUTTON, self.OnBarGraph, cmplstatusbtn)
-        difsourcebtn = wx.Button(panel2, 209, "Averages Difficulty Interviews by Source")
-        self.Bind(wx.EVT_BUTTON, self.OnBarGraph, difsourcebtn)
-        difcmplstatusbtn = wx.Button(panel2, 210, "Averages Difficulty Interviews by Completion status")
-        self.Bind(wx.EVT_BUTTON, self.OnBarGraph, difcmplstatusbtn)
-        fstsourcebtn = wx.Button(panel2, 211, "Average scores speed process by Source")
-        self.Bind(wx.EVT_BUTTON, self.OnBarGraph, fstsourcebtn) 
-        fstcmplstatusbtn = wx.Button(panel2, 212, "Average scores speed process by Completion status")
-        self.Bind(wx.EVT_BUTTON, self.OnBarGraph, fstcmplstatusbtn) 
 
         # Use a sizer to layout the controls, stacked vertically and with
         # a 10 pixel border around each. Order of buttons to be determined here
@@ -346,12 +406,9 @@ class MyFrame(wx.Frame):
         
         sizer2 = wx.BoxSizer(wx.VERTICAL)
         sizer2.Add(text_corr, 0, wx.ALL, 10)
-        sizer2.Add(sourcebtn, 0, wx.ALL, 10) 
-        sizer2.Add(cmplstatusbtn, 0, wx.ALL, 10)
-        sizer2.Add(difsourcebtn, 0, wx.ALL, 10) 
-        sizer2.Add(difcmplstatusbtn, 0, wx.ALL, 10)
-        sizer2.Add(fstsourcebtn, 0, wx.ALL, 10)     
-        sizer2.Add(fstcmplstatusbtn, 0, wx.ALL, 10)
+        sizer2.Add(barprocbtn, 0, wx.ALL, 10) 
+        sizer2.Add(bardifbtn, 0, wx.ALL, 10) 
+        sizer2.Add(barfstbtn, 0, wx.ALL, 10)     
         sizer2.Add(text_role, 0, wx.ALL, 10)      
         sizer2.Add(scoredistbtn, 0, wx.ALL, 10)
         sizer2.Add(fbreceivedbtn, 0, wx.ALL, 10)
@@ -367,15 +424,15 @@ class MyFrame(wx.Frame):
         self.SetSizer(sizer)
 
     def OnLineGraph(self,evt):
-        win = GraphWindow(self, -1, evt.GetEventObject().GetLabel(), evt.GetId(), size=(500, 400), style = wx.DEFAULT_FRAME_STYLE)
+        win =  Line_Hbar_GraphWindow(self, -1, evt.GetEventObject().GetLabel(), evt.GetId(), size=(500, 400), style = wx.DEFAULT_FRAME_STYLE)
         win.Show(True)
         
     def OnHbarGraph(self,evt):
-        win = GraphWindow(self, -1, evt.GetEventObject().GetLabel(), evt.GetId(), size=(500, 400), style = wx.DEFAULT_FRAME_STYLE)
+        win = Line_Hbar_GraphWindow(self, -1, evt.GetEventObject().GetLabel(), evt.GetId(), size=(500, 400), style = wx.DEFAULT_FRAME_STYLE)
         win.Show(True)
       
     def OnBarGraph (self, evt):
-        win = GraphWindow(self, -1, evt.GetEventObject().GetLabel(), evt.GetId(), size=(500, 400), style = wx.DEFAULT_FRAME_STYLE)
+        win = Bar_GraphWindow(self, -1, evt.GetEventObject().GetLabel(), evt.GetId(), size=(500, 400), style = wx.DEFAULT_FRAME_STYLE)
         win.Show(True)       
 
     def month_score_dist(self, evt):

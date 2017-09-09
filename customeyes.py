@@ -76,8 +76,7 @@ def average_score_calc(stats):
                     stats[month][series_name] = sum(scores)/len(scores)
                 else:
                     stats[month][series_name] = None
-        
-        
+              
 #date calculators       
 def dates_setting(d,date_column_name):
     if date_column_name not in d: 
@@ -105,8 +104,7 @@ def create_month_axes(start_date, end_date):
     return stats
  
 #single and multi line
-def line_month_averages(data, date_column_name, score_column_name, stats = None, series_name = None, roles = 'Requisition_Title', 
-    role_title = None, start_date = None, end_date = None):   
+def line_month_averages(data, date_column_name, score_column_name, stats = None, series_name = None, roles = 'Requisition_Title', role_title = None, start_date = None, end_date = None):   
     if stats is None:
         stats = dict()
     if start_date is None:
@@ -151,9 +149,12 @@ def draw_lineplot(stats, date_column_name, score_column_name, title):
         ylabel = "From {:} (0) to {:} (10)".format(*ylabels), xlabel = "By {:}".format(date_column_name), bottom = 0, top = 10) 
         
 #bar charts               
-def hbar_role_averages(data, score_column_name = None, stats = None, series_name = None, role = 'Requisition_Title', role_titles = None): 
+def hbar_role_averages(data, score_column_name = None, stats = None, start_date = None, end_date = None, series_name = None, role = 'Requisition_Title', role_titles = None): 
     stats = dict()
     
+    if start_date is None:
+        start_date = datetime.date(2016,11,1)
+
     if series_name is None:
         series_name = role_titles or "All Roles"
     if score_column_name == "Degree difficulty interviews":
@@ -164,6 +165,11 @@ def hbar_role_averages(data, score_column_name = None, stats = None, series_name
     for d in data:
         if role_titles is not None and d[role] not in role_titles:
             continue
+        
+        month = dates_setting(d,"Application Date")
+        if month is None or month < start_date or (end_date is not None and month > end_date): 
+            continue    
+        
         if d[role] not in stats:
             stats[d[role]] = list()
         score = score_parser(d,score_column_name)    
@@ -187,21 +193,31 @@ def draw_hbarplot(stats, score_column_name, title):
     customeyes_plots.hbarplot(stats, "{:} {:}".format("Average score per role", title), 
         xlabel = "From {:} (0) to {:} (10)".format(*xlabels), sort_key = lambda (k,v): v, left = 0, right = 10) 
 
-#should give different name
-def barchart_average_scores(data, score_column_name = None, stats = None, series_name = None, x_series = None, role_titles = None):    
+#TO DO: insert data selection possibility and graphs per role and choice between source and completion status
+def barchart_average_scores(data, score_column_name = None, stats = None, start_date = None, end_date = None,  roles = "Requisition_Title", series_name = None, x_series = None, role_title = None):    
     stats = dict()
 
+    if start_date is None:
+        start_date = datetime.date(2016,11,1)
+
     score_column_name = "Recruitment process"  
-    x_series = "Degree difficulty interviews"
+    x_series = "Source"
 
     if series_name is None:
-        series_name = role_titles or "All Roles"
+        series_name = role_title or "All Roles"
     if score_column_name == "Degree difficulty interviews":
         score_parser = score_converter
     else:
         score_parser = score_strip
 
     for d in data:
+        if role_title is not None and d[roles] != role_title:
+            continue
+        
+        month = dates_setting(d,"Application Date")
+        if month is None or month < start_date or (end_date is not None and month > end_date): 
+            continue
+
         if x_series not in d:
             continue
         if d[x_series] not in stats:
@@ -216,7 +232,9 @@ def barchart_average_scores(data, score_column_name = None, stats = None, series
         else:
             stats[x_serie] = 0
  
-#def draw_barplot(stats, score_column_name, title)
+    return stats
+
+def draw_barplot(stats, score_column_name, title):
     customeyes_plots.barplot(stats, "Sources",ylabel="Average Score", bar_width = 0.75, sort_key = lambda (k,v): -v)
 
 
