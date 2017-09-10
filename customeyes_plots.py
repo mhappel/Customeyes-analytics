@@ -38,11 +38,11 @@ def hbarplot(stats, title, sort_key=None, data_label=None, xlabel=None, ylabel=N
     labels = list()
     buckets = list()
     
-    for k,v in sorted(stats.items(), key = sort_key):
+    for k,(v,c) in sorted(stats.items(), key = sort_key):
+        print k,v,c
         if data_label is not None:
-            labels.append(data_label(k))
-        else:    
-            labels.append(k)
+            k = data_label(k)
+        labels.append("{:} ({:} records)".format(k,c))
         buckets.append(v)
 
     y_pos = np.arange(len(labels))
@@ -55,7 +55,7 @@ def hbarplot(stats, title, sort_key=None, data_label=None, xlabel=None, ylabel=N
     
     ax.barh(y_pos, buckets, align='center', color='blue', ecolor='black')
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(labels)
+    ax.set_yticklabels(labels, ha = "right", va = "center", wrap = True )
     #ax.invert_yaxis()  # labels read top-to-bottom
     ax.set_xlabel(xlabel)
     ax.set_title(title)
@@ -67,11 +67,10 @@ def barplot(stats, title, xlabel=None, ylabel=None, data_label=None, bar_width=N
     buckets2 = list()
     buckets3 = list()
     
-    for k,v in sorted(stats.items(), key = sort_key):
+    for k,(v,c) in sorted(stats.items(), key = sort_key):
         if data_label is not None:
-            labels.append(data_label(k))
-        else:    
-            labels.append(k)
+            k = data_label(k)
+        labels.append("{:} ({:} records)".format(k,c))
         buckets.append(v)
 
     fig, ax = plt.subplots()

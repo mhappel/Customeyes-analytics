@@ -177,8 +177,9 @@ def hbar_role_averages(data, score_column_name = None, stats = None, start_date 
             stats[d[role]].append(score) 
     
     for rt,scores in (stats.items()):
-        if len(scores)>0:
-            stats[rt] = sum(scores)/len(scores)
+        record_count = len(scores)
+        if record_count>0:
+            stats[rt] = (sum(scores)/record_count, record_count)
         else:
             del stats[rt]
 
@@ -191,7 +192,7 @@ def draw_hbarplot(stats, score_column_name, title):
         xlabels = ("Strongly Disagree", "Strongly Agree")
     
     customeyes_plots.hbarplot(stats, "{:} {:}".format("Average score per role", title), 
-        xlabel = "From {:} (0) to {:} (10)".format(*xlabels), sort_key = lambda (k,v): v, left = 0, right = 10) 
+        xlabel = "From {:} (0) to {:} (10)".format(*xlabels), sort_key = lambda (k,(v,c)): v, left = 0, right = 10) 
 
 #TO DO: insert data selection possibility and graphs per role and choice between source and completion status
 def barchart_average_scores(data, score_column_name = None, stats = None, start_date = None, end_date = None,  roles = "Requisition_Title", series_name = None, x_series = None, role_title = None):    
@@ -199,9 +200,6 @@ def barchart_average_scores(data, score_column_name = None, stats = None, start_
 
     if start_date is None:
         start_date = datetime.date(2016,11,1)
-
-    score_column_name = "Recruitment process"  
-    x_series = "Source"
 
     if series_name is None:
         series_name = role_title or "All Roles"
@@ -222,47 +220,23 @@ def barchart_average_scores(data, score_column_name = None, stats = None, start_
             continue
         if d[x_series] not in stats:
             stats[d[x_series]] = list()
-        score = score_parser(d,score_column_name) 
+        score = score_parser(d,score_column_name)
         if score is not None:    
             stats[d[x_series]].append(score)
 
     for x_serie,scores in stats.items():
-        if len(scores)>0:
-            stats[x_serie] = sum(scores)/len(scores)
+        record_count = len(scores)
+        if record_count>0:
+            stats[x_serie] = (sum(scores)/record_count,record_count)
         else:
             stats[x_serie] = 0
  
     return stats
 
 def draw_barplot(stats, score_column_name, title):
-    customeyes_plots.barplot(stats, "Sources",ylabel="Average Score", bar_width = 0.75, sort_key = lambda (k,v): -v)
+    customeyes_plots.barplot(stats, "Title to be changed",ylabel="Average Score", bar_width = 0.75, sort_key = lambda (k,(v,c)): -v) #TO DO: Change the generation of title
 
-
-#Average overall interview process scores by source
-
-#TO DO: make generic and per role
-def source_overall_scores2(data):    
-    stats = dict()
-    score_column_name = 'Recruitment process'
-    for d in data:
-        if 'Source' not in d:
-            continue
-        if d['Source'] not in stats:
-            stats[d['Source']] = list()
-        if score_column_name in d:
-            try:
-                v = float(d[score_column_name].split('-', 1)[0].strip())
-                stats[d['Source']].append(v)
-            except: pass
-    for source,scores in stats.items():
-        if len(scores)>0:
-            stats[source] = sum(scores)/len(scores)
-        else:
-            stats[source] = 0
- 
-#def draw_barplot(stats, score_column_name, title)
-    customeyes_plots.barplot(stats, "Sources",ylabel="Average Score", bar_width = 0.75, sort_key = lambda (k,v): -v)
-    
+  
 #Histogram scores overall recruitment process
 #TO DO: make it per role
 def month_score_dist(data):    
@@ -303,7 +277,6 @@ def feedback_recieved(data):
         stats[keys] = (float(occ)/count)*100
     
     customeyes_plots.pieplot(stats, "Feedback Received?")
-
 
 def completion_status(data):
     stats = {"Rejected":0, "Offer accepted":0, "Offer declined":0}
