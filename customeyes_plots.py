@@ -39,7 +39,6 @@ def hbarplot(stats, title, sort_key=None, data_label=None, xlabel=None, ylabel=N
     buckets = list()
     
     for k,(v,c) in sorted(stats.items(), key = sort_key):
-        print k,v,c
         if data_label is not None:
             k = data_label(k)
         labels.append("{:} ({:} records)".format(k,c))
@@ -63,10 +62,7 @@ def hbarplot(stats, title, sort_key=None, data_label=None, xlabel=None, ylabel=N
 def barplot(stats, title, xlabel=None, ylabel=None, data_label=None, bar_width=None, sort_key=None, bottom=None, top=None):
     labels = list()
     buckets = list()
-    buckets1 = list()
-    buckets2 = list()
-    buckets3 = list()
-    
+
     for k,(v,c) in sorted(stats.items(), key = sort_key):
         if data_label is not None:
             k = data_label(k)
@@ -87,21 +83,6 @@ def barplot(stats, title, xlabel=None, ylabel=None, data_label=None, bar_width=N
                      color="b",
                      label="series 1 label")
     
-    #rects2 = plt.bar(index + bar_width, buckets1, bar_width,
-     #                alpha=opacity,
-      #               color="r",
-       #              label="series 2 label")
-    
-    #rects3 = plt.bar(index + bar_width + bar_width, buckets2, bar_width,
-     #                alpha=opacity,
-      #               color="g",
-       #              label="series 3 label")
-                     
-    #rects4 = plt.bar(index + bar_width + bar_width + bar_width, buckets3, bar_width,
-     #                alpha=opacity,
-      #               color="y",
-       #              label="series 4 label")
- 
     if bottom is None:
         bottom = min(buckets)*0.90
     if top is None:
@@ -118,6 +99,44 @@ def barplot(stats, title, xlabel=None, ylabel=None, data_label=None, bar_width=N
 
     plt.tight_layout()
     #plt.savefig("test.png")
+
+def histoplot(stats, title, xlabel=None, ylabel=None, data_label=None, bar_width=1, sort_key=None, bottom=0, top=None):
+    labels = list()
+    buckets = list()
+
+    for k,(v) in sorted(stats.items(), key = sort_key):
+        if data_label is not None:
+            k = data_label(k)
+        labels.append("{:}".format(k))
+        buckets.append(v)
+
+    fig, ax = plt.subplots()
+    index = np.arange(len(buckets))
+    opacity = 0.6
+
+    x_ticks = ax.get_xticklabels()
+    for x_tick in x_ticks:
+        x_tick.set_rotation(45)
+        x_tick.set_horizontalalignment("right")
+
+    rects1 = plt.bar(index, buckets, bar_width,
+                     alpha=opacity,
+                     color="b",
+                     label="series 1 label")
+ 
+    ax.set_ylim(bottom=bottom, top=top, emit=True, auto=False)
+                     
+    if xlabel is not None:
+        plt.xlabel(xlabel)
+    if ylabel is not None:
+        plt.ylabel(ylabel)
+    plt.title(title)
+    plt.xticks(index, labels)
+    #plt.legend()
+
+    plt.tight_layout()
+    #plt.savefig("test.png")
+
 
 def lineplot(stats, title, xlabel=None, ylabel=None, data_label=None, bottom=None, top=None):
     month = mdates.MonthLocator()  #every month

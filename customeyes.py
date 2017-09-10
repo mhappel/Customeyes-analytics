@@ -145,8 +145,7 @@ def draw_lineplot(stats, date_column_name, score_column_name, title):
     else:
         ylabels = ("Strongly Disagree", "Strongly Agree")
     
-    customeyes_plots.lineplot(stats, "{:} {:}".format("Average score", title), 
-        ylabel = "From {:} (0) to {:} (10)".format(*ylabels), xlabel = "By {:}".format(date_column_name), bottom = 0, top = 10) 
+    customeyes_plots.lineplot(stats, "{:}".format(title), ylabel = "From {:} (0) to {:} (10)".format(*ylabels), xlabel = "By {:}".format(date_column_name), bottom = 0, top = 10) 
         
 #bar charts               
 def hbar_role_averages(data, score_column_name = None, stats = None, start_date = None, end_date = None, series_name = None, role = "Requisition_Title", role_titles = None): 
@@ -191,14 +190,11 @@ def draw_hbarplot(stats, score_column_name, title):
     else:
         xlabels = ("Strongly Disagree", "Strongly Agree")
     
-    customeyes_plots.hbarplot(stats, "{:} {:}".format("Average score per role", title), 
-        xlabel = "From {:} (0) to {:} (10)".format(*xlabels), sort_key = lambda (k,(v,c)): v, left = 0, right = 10) 
+    customeyes_plots.hbarplot(stats, "{:}".format(title), xlabel = "From {:} (0) to {:} (10)".format(*xlabels), sort_key = lambda (k,(v,c)): v, left = 0, right = 10) 
 
 #TO DO: insert data selection possibility and graphs per role and choice between source and completion status
 def barchart_average_scores(data, score_column_name = None, stats = None, start_date = None, end_date = None,  roles = "Requisition_Title", series_name = None, x_series = None, role_title = None):    
     stats = dict()
-
-    print score_column_name, x_series
 
     if start_date is None:
         start_date = datetime.date(2016,11,1)
@@ -236,7 +232,13 @@ def barchart_average_scores(data, score_column_name = None, stats = None, start_
     return stats
 
 def draw_barplot(stats, score_column_name, title):
-    customeyes_plots.barplot(stats, "Title to be automatically generated",ylabel="Average Score", bar_width = 0.75, sort_key = lambda (k,(v,c)): -v) #TO DO: Change the generation of title
+
+    if score_column_name == "Degree difficulty interviews":
+        ylabels = ("Very Easy", "Very Difficult")
+    else:
+        ylabels = ("Strongly Disagree", "Strongly Agree")
+    
+    customeyes_plots.barplot(stats, "{:}".format(title), ylabel = "From {:} (0) to {:} (10)".format(*ylabels), bar_width = 0.75, sort_key = lambda (k,(v,c)): -v) #TO DO: Change the generation of title
 
   
 #Histogram scores overall recruitment process
@@ -263,9 +265,9 @@ def month_score_dist(data):
                 pass
     for keys,occ in sorted(stats.items()):
         stats[keys] = (float(occ)/count)*100
-    customeyes_plots.barplot(stats, "Distribution scores \"Recruitment Process\"",
-        ylabel="%",data_label=lambda k: k[1], bar_width = 1, bottom = 0)
- 
+    customeyes_plots.histoplot(stats, "Distribution scores \"Recruitment Process\"",ylabel="%",data_label=lambda k: k[1])
+
+
 def feedback_recieved(data):
     stats = {"Yes":0, "No":0}
     count = 0

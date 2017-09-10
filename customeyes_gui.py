@@ -169,7 +169,6 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
         
         stats = customeyes.create_month_axes(start_date, end_date)
         
-        #pprint.pprint(line_series[self.button_id - 101])
         series = category_info[self.category]["series"][self.series_idx]    
         
         if len(series) == 1:
@@ -195,7 +194,6 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
             for s in series:
                 customeyes.line_month_averages(app.data, date_column_name, s, start_date = start_date, end_date = end_date, stats = stats, series_name =  s, role_title = role_title)
 
-        #pprint.pprint(stats)
         has_data = False
         
         for s in stats.values():
@@ -215,7 +213,6 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
             dlg.Destroy()
 
     def On_publish_hbar_chart(self,event):
-        #score_column_name = "Degree difficulty interviews"
              
         start_year = int(self.startyearch.GetStringSelection())
         start_month = self.startmonthch.GetSelection() + 1
@@ -287,7 +284,6 @@ class Bar_GraphWindow(Base_GraphWindow):
         end_date = datetime.date(end_year, end_month, 1) 
 
         x_series = category_info[self.category]["series"][self.choicech.GetSelection()] 
-        print x_series
   
         if start_date > end_date:
             dlg = wx.MessageDialog(self, "Cannot select End Date before Start Date.", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
@@ -304,7 +300,7 @@ class Bar_GraphWindow(Base_GraphWindow):
             role_title = app.roles[role_idx]
             title = "{:} {:}".format(self.GetLabel(), role_title)
 
-        score_column_name = category_info[self.category]["series"][self.series_idx - 1]
+        score_column_name = category_info[self.category - 1]["series"][self.series_idx]
         stats = customeyes.barchart_average_scores(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, x_series = x_series, role_title = role_title)
         
         has_data = False
@@ -324,7 +320,7 @@ class MyFrame(wx.Frame):
     """
     def __init__(self, parent, title):
 
-        super(MyFrame, self).__init__(parent, -1, title, pos=(150, 150), size=(700, 650))
+        super(MyFrame, self).__init__(parent, -1, title, pos=(150, 150), size=(750, 750))
 
         # Create the menubar
         menuBar = wx.MenuBar()
@@ -348,59 +344,60 @@ class MyFrame(wx.Frame):
         panel1 = wx.Panel(self)
         panel2 = wx.Panel(self)
 
-        # and controls
-        text_line = wx.StaticText(panel1, -1, "Role Comparison by Month")
-        text_line.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-        text_line.SetSize(text_line.GetBestSize())
-        #line Graphs by month and role
-        trendbtn = wx.Button(panel1, 101, "Overall Score Recruitment process")
-        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, trendbtn)
-        ivdifbtn = wx.Button(panel1, 102, "Interview Difficulty")
-        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, ivdifbtn)
-        fastivbtn = wx.Button(panel1, 103, "Fast application process")
-        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fastivbtn)
-        
-        #multi line Graphs by month and role
-        text_multiline = wx.StaticText(panel1, -1, "Multi Line By Month and Role")
-        text_multiline.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-        text_multiline.SetSize(text_line.GetBestSize())        
-        ivfbbtn = wx.Button(panel1, 104, "Interviewer Feedback")
-        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, ivfbbtn)
-        fbvaluesbtn = wx.Button(panel1, 105, "Feedback on Booking.com Values")
-        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbvaluesbtn)
-        fbqualitybtn = wx.Button(panel1, 106, "Feedback Quality")
-        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbqualitybtn)
-        
-        #compare roles , category 2
-        text_other = wx.StaticText(panel1, -1, "Compare Roles")
-        text_other.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-        text_other.SetSize(text_other.GetBestSize())
-        overallbtn = wx.Button(panel1, 201, "Overall Score Recruitment process")
-        self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, overallbtn)
-        ivdif2btn = wx.Button(panel1, 202, "Interview Difficulty")
-        self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, ivdif2btn)
-        fastiv2btn = wx.Button(panel1, 203, "Fast application process")
-        self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, fastiv2btn)
 
-        #vertical bar charts per role category 3
-        text_corr = wx.StaticText(panel2, -1, "Bar Charts by Role")
-        text_corr.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-        text_corr.SetSize(text_corr.GetBestSize())
-        barprocbtn = wx.Button(panel2, 301, "Averages Recruitment process scores")
+        #Overal recruitment process scores analytics
+        text_process = wx.StaticText(panel1, -1, "\"My overall experience of the \nprocess was good\"") 
+        text_process.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+        text_process.SetSize(text_process.GetBestSize())
+        trendbtn = wx.Button(panel1, 101, "Compare average monthly scores by role")
+        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, trendbtn)
+        overallbtn = wx.Button(panel1, 201, "Compare roles")
+        self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, overallbtn)
+        barprocbtn = wx.Button(panel1, 301, "Compare averages and correlations by role")
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barprocbtn)
-        bardifbtn = wx.Button(panel2, 302, "Averages Difficulty Interviews")
+        scoredistbtn = wx.Button(panel1, 501, "Distribution of scores")
+        self.Bind(wx.EVT_BUTTON, self.month_score_dist, scoredistbtn)
+
+        #Difficulty interviews analytics
+        text_diff = wx.StaticText(panel1, -1, "Degree Difficulty Interviews") #rename text variable
+        text_diff.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+        text_diff.SetSize(text_diff.GetBestSize())
+        ivdifbtn = wx.Button(panel1, 102, "Compare average monthly scores by role")
+        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, ivdifbtn)
+        ivdif2btn = wx.Button(panel1, 202, "Compare roles")
+        self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, ivdif2btn)
+        bardifbtn = wx.Button(panel1, 302, "Compare averages and correlations by role")
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, bardifbtn)
-        barfstbtn = wx.Button(panel2, 303, "Average scores speed process")
+
+        #Speed interviews analytics
+        text_fast = wx.StaticText(panel1, -1, "\"I had a fast interview process\"") 
+        text_fast.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+        text_fast.SetSize(text_fast.GetBestSize())
+        fastivbtn = wx.Button(panel1, 103, "Compare average monthly scores by role")
+        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fastivbtn)
+        fastiv2btn = wx.Button(panel1, 203, "Compare roles")
+        self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, fastiv2btn)
+        barfstbtn = wx.Button(panel1, 303, "Compare averages and correlations by role")
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barfstbtn) 
 
-        #standalone graphs new categories
-        text_role = wx.StaticText(panel2, -1, "Standalone graphs") #need to make per role as well
-        text_role.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-        text_role.SetSize(text_role.GetBestSize())
+        #Feedback analytics
+        text_fb = wx.StaticText(panel2, -1, "Feedback on Booking.com, \ninterviews and feedback") 
+        text_fb.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+        text_fb.SetSize(text_fb.GetBestSize())        
+        ivfbbtn = wx.Button(panel2, 104, "Interviewer Feedback")
+        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, ivfbbtn)
+        fbvaluesbtn = wx.Button(panel2, 105, "Feedback on Booking.com Values")
+        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbvaluesbtn)
+
+        fbqualitybtn = wx.Button(panel2, 106, "Feedback Quality")
+        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbqualitybtn)
         fbreceivedbtn = wx.Button(panel2, 401, "Feedback recieved?")
         self.Bind(wx.EVT_BUTTON, self.feedback_recieved, fbreceivedbtn)
-        scoredistbtn = wx.Button(panel2, 501, "Overall Score Distribution")
-        self.Bind(wx.EVT_BUTTON, self.month_score_dist, scoredistbtn)
+
+        #standalone graphs new categories
+        text_other = wx.StaticText(panel2, -1, "Standalone graphs \n(more graphs to be added)") #need to make per role as well
+        text_other.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+        text_other.SetSize(text_other.GetBestSize())
         statusbtn = wx.Button(panel2, 402, "Distribution Rejected, Offered & Hired")
         self.Bind(wx.EVT_BUTTON, self.completion_status, statusbtn)
 
@@ -408,30 +405,36 @@ class MyFrame(wx.Frame):
         # a 10 pixel border around each. Order of buttons to be determined here
 
         sizer1 = wx.BoxSizer(wx.VERTICAL)
-        sizer1.Add(text_line, 0, wx.ALL, 10)
+        
+        sizer1.Add(text_process, 0, wx.ALL, 10)
         sizer1.Add(trendbtn, 0, wx.ALL, 10)
+        sizer1.Add(overallbtn, 0, wx.ALL, 10)       
+        sizer1.Add(barprocbtn, 0, wx.ALL, 10) 
+        sizer1.Add(scoredistbtn, 0, wx.ALL, 10)
+
+        sizer1.Add(text_diff, 0, wx.ALL, 10)
         sizer1.Add(ivdifbtn, 0, wx.ALL, 10)
+        sizer1.Add(ivdif2btn, 0, wx.ALL, 10)      
+        sizer1.Add(bardifbtn, 0, wx.ALL, 10) 
+
+        sizer1.Add(text_fast, 0, wx.ALL, 10)
         sizer1.Add(fastivbtn, 0, wx.ALL, 10)
-        sizer1.Add(text_multiline, 0, wx.ALL, 10)
-        sizer1.Add(ivfbbtn, 0, wx.ALL, 10)
-        sizer1.Add(fbvaluesbtn, 0, wx.ALL, 10)
-        sizer1.Add(fbqualitybtn, 0, wx.ALL, 10)
-        sizer1.Add(text_other, 0, wx.ALL, 10)
-        sizer1.Add(overallbtn, 0, wx.ALL, 10)
-        sizer1.Add(ivdif2btn, 0, wx.ALL, 10)
-        sizer1.Add(fastiv2btn,0,wx.ALL,10)
+        sizer1.Add(fastiv2btn,0,wx.ALL,10)        
+        sizer1.Add(barfstbtn, 0, wx.ALL, 10)  
+
         panel1.SetSizer(sizer1)
         panel1.Layout()
-        
         sizer2 = wx.BoxSizer(wx.VERTICAL)
-        sizer2.Add(text_corr, 0, wx.ALL, 10)
-        sizer2.Add(barprocbtn, 0, wx.ALL, 10) 
-        sizer2.Add(bardifbtn, 0, wx.ALL, 10) 
-        sizer2.Add(barfstbtn, 0, wx.ALL, 10)     
-        sizer2.Add(text_role, 0, wx.ALL, 10)      
-        sizer2.Add(scoredistbtn, 0, wx.ALL, 10)
-        sizer2.Add(fbreceivedbtn, 0, wx.ALL, 10)
+        
+        sizer2.Add(text_fb, 0, wx.ALL, 10)
+        sizer2.Add(ivfbbtn, 0, wx.ALL, 10)
+        sizer2.Add(fbvaluesbtn, 0, wx.ALL, 10)
+        sizer2.Add(fbqualitybtn, 0, wx.ALL, 10)
+        sizer2.Add(fbreceivedbtn, 0, wx.ALL, 10)    
+
+        sizer2.Add(text_other, 0, wx.ALL, 10)
         sizer2.Add(statusbtn, 0, wx.ALL, 10)
+
         panel2.SetSizer(sizer2)
         panel2.Layout()
 
