@@ -4,12 +4,12 @@ import matplotlib.dates as mdates
 import numpy as np
 import matplotlib.pyplot as plt
 styles = [
-    'b.-',
-    'r.-',
-    'y.-',
-    'g.-',
-    'm.-',
-    'c.-',
+    "b.-",
+    "r.-",
+    "y.-",
+    "g.-",
+    "m.-",
+    "c.-",
 ]
 #TO DO: indicate number of records next to series
 
@@ -25,9 +25,9 @@ def pieplot(stats, title, data_label=None):
         sizes.append(v)
         
     fig1, ax1 = plt.subplots()
-    ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
+    ax1.pie(sizes, labels=labels, autopct="%1.1f%%",
         shadow=False, startangle=180)
-    ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    ax1.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
     ax1.set_title(title)
     
   
@@ -53,7 +53,7 @@ def hbarplot(stats, title, sort_key=None, data_label=None, xlabel=None, ylabel=N
         right = max(buckets)*1.11
     ax.set_xlim(left=left, right=right, emit=True, auto=False)
     
-    ax.barh(y_pos, buckets, align='center', color='blue', ecolor='black')
+    ax.barh(y_pos, buckets, align="center", color="blue", ecolor="black")
     ax.set_yticks(y_pos)
     ax.set_yticklabels(labels, ha = "right", va = "center", wrap = True )
     #ax.invert_yaxis()  # labels read top-to-bottom
@@ -80,27 +80,27 @@ def barplot(stats, title, xlabel=None, ylabel=None, data_label=None, bar_width=N
     x_ticks = ax.get_xticklabels()
     for x_tick in x_ticks:
         x_tick.set_rotation(45)
-        x_tick.set_horizontalalignment('right')
+        x_tick.set_horizontalalignment("right")
 
     rects1 = plt.bar(index, buckets, bar_width,
                      alpha=opacity,
-                     color='b',
-                     label='series 1 label')
+                     color="b",
+                     label="series 1 label")
     
     #rects2 = plt.bar(index + bar_width, buckets1, bar_width,
      #                alpha=opacity,
-      #               color='r',
-       #              label='series 2 label')
+      #               color="r",
+       #              label="series 2 label")
     
     #rects3 = plt.bar(index + bar_width + bar_width, buckets2, bar_width,
      #                alpha=opacity,
-      #               color='g',
-       #              label='series 3 label')
+      #               color="g",
+       #              label="series 3 label")
                      
     #rects4 = plt.bar(index + bar_width + bar_width + bar_width, buckets3, bar_width,
      #                alpha=opacity,
-      #               color='y',
-       #              label='series 4 label')
+      #               color="y",
+       #              label="series 4 label")
  
     if bottom is None:
         bottom = min(buckets)*0.90
@@ -121,7 +121,7 @@ def barplot(stats, title, xlabel=None, ylabel=None, data_label=None, bar_width=N
 
 def lineplot(stats, title, xlabel=None, ylabel=None, data_label=None, bottom=None, top=None):
     month = mdates.MonthLocator()  #every month
-    monthsFmt = mdates.DateFormatter('%b, %Y')
+    monthsFmt = mdates.DateFormatter("%b, %Y")
        
     x_date = list()
     series = collections.defaultdict(list)
@@ -153,8 +153,8 @@ def lineplot(stats, title, xlabel=None, ylabel=None, data_label=None, bottom=Non
         plt.ylabel(ylabel)
     plt.title(title)     
     
-    legend = ax.legend(loc='lower center', shadow=False, fontsize='medium')
-    legend.get_frame().set_facecolor('#FFFFFF')
+    legend = ax.legend(loc="lower center", shadow=False, fontsize="medium")
+    legend.get_frame().set_facecolor("#FFFFFF")
 
     fig.autofmt_xdate()
     #plt.savefig("test.png")

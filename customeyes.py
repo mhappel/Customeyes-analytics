@@ -9,7 +9,7 @@ role_prefix_blacklist = ["Accommodation Service Executive", "Commercial Owner", 
 
 #loading data from Excel
 def load_data():
-    wb = open_workbook('report.xlsx')
+    wb = open_workbook("report.xlsx")
     s = wb.sheets()[0]
     
     header_col_map = dict()
@@ -51,7 +51,7 @@ def dump_data(data):
         
 #score calculations functions
 def score_converter(d,score_column_name):    
-    text_to_score = {'Very easy':0, 'Easy':2.5, 'Average':5, 'Difficult':7.5, 'Very difficult':10}
+    text_to_score = {"Very easy":0, "Easy":2.5, "Average":5, "Difficult":7.5, "Very difficult":10}
     if score_column_name in d:
         try:
             v = d[score_column_name].strip()
@@ -64,7 +64,7 @@ def score_strip(d,score_column_name):
         if isinstance(d[score_column_name], float):
             return d[score_column_name]
         try:
-            return float(d[score_column_name].split('-', 1)[0].strip())
+            return float(d[score_column_name].split("-", 1)[0].strip())
         except ValueError: pass
     return None
     
@@ -82,10 +82,10 @@ def dates_setting(d,date_column_name):
     if date_column_name not in d: 
         return None
     if date_column_name in d:
-        day_month_format = date_column_name == 'Rejection Date'
+        day_month_format = date_column_name == "Rejection Date"
         date_column = d[date_column_name]
         try:
-            dates = datetime.datetime.strptime(d[date_column_name],'%m/%d/%Y').date()
+            dates = datetime.datetime.strptime(d[date_column_name],"%m/%d/%Y").date()
             return datetime.date(dates.year,dates.month,1)
         except ValueError:
            return None 
@@ -104,7 +104,7 @@ def create_month_axes(start_date, end_date):
     return stats
  
 #single and multi line
-def line_month_averages(data, date_column_name, score_column_name, stats = None, series_name = None, roles = 'Requisition_Title', role_title = None, start_date = None, end_date = None):   
+def line_month_averages(data, date_column_name, score_column_name, stats = None, series_name = None, roles = "Requisition_Title", role_title = None, start_date = None, end_date = None):   
     if stats is None:
         stats = dict()
     if start_date is None:
@@ -149,7 +149,7 @@ def draw_lineplot(stats, date_column_name, score_column_name, title):
         ylabel = "From {:} (0) to {:} (10)".format(*ylabels), xlabel = "By {:}".format(date_column_name), bottom = 0, top = 10) 
         
 #bar charts               
-def hbar_role_averages(data, score_column_name = None, stats = None, start_date = None, end_date = None, series_name = None, role = 'Requisition_Title', role_titles = None): 
+def hbar_role_averages(data, score_column_name = None, stats = None, start_date = None, end_date = None, series_name = None, role = "Requisition_Title", role_titles = None): 
     stats = dict()
     
     if start_date is None:
@@ -198,6 +198,8 @@ def draw_hbarplot(stats, score_column_name, title):
 def barchart_average_scores(data, score_column_name = None, stats = None, start_date = None, end_date = None,  roles = "Requisition_Title", series_name = None, x_series = None, role_title = None):    
     stats = dict()
 
+    print score_column_name, x_series
+
     if start_date is None:
         start_date = datetime.date(2016,11,1)
 
@@ -229,12 +231,12 @@ def barchart_average_scores(data, score_column_name = None, stats = None, start_
         if record_count>0:
             stats[x_serie] = (sum(scores)/record_count,record_count)
         else:
-            stats[x_serie] = 0
+            stats[x_serie] = (0,0)
  
     return stats
 
 def draw_barplot(stats, score_column_name, title):
-    customeyes_plots.barplot(stats, "Title to be changed",ylabel="Average Score", bar_width = 0.75, sort_key = lambda (k,(v,c)): -v) #TO DO: Change the generation of title
+    customeyes_plots.barplot(stats, "Title to be automatically generated",ylabel="Average Score", bar_width = 0.75, sort_key = lambda (k,(v,c)): -v) #TO DO: Change the generation of title
 
   
 #Histogram scores overall recruitment process
@@ -248,11 +250,11 @@ def month_score_dist(data):
         (10.0,"Strongly agree"):0
         }
     count = 0
-    score_column_name = 'Recruitment process'
+    score_column_name = "Recruitment process"
     for d in data:
         if score_column_name in d:
             try:
-                v = d[score_column_name].split('-', 1)    
+                v = d[score_column_name].split("-", 1)    
                 if len(v) == 2:
                     v = (float(v[0].strip()), v[1].strip())
                     stats[v] += 1
@@ -296,21 +298,21 @@ def completion_status(data):
 def hv_av_scores_interview_stage(data):    
     stats = dict()
     stages = [
-        'Satisfaction online assessments',
-        'Technical phone interview satisfaction',
-        'Recruiter phone interview satisfaction',
-        'Satisfaction face to face interviews',
+        "Satisfaction online assessments",
+        "Technical phone interview satisfaction",
+        "Recruiter phone interview satisfaction",
+        "Satisfaction face to face interviews",
     ]
     for d in data:
-        if 'Requisition_Title' not in stats:
-            stats['Requisition_Title'] = dict()
+        if "Requisition_Title" not in stats:
+            stats["Requisition_Title"] = dict()
             for stage in stages:
-                stats['Requisition_Title'][stage] = list()
+                stats["Requisition_Title"][stage] = list()
         for stage in stages:
             if stage in d:
                 try:
-                    v = float(d[stage].split('-', 1)[0].strip())
-                    stats['Requisition_Title'][stage].append(v)
+                    v = float(d[stage].split("-", 1)[0].strip())
+                    stats["Requisition_Title"][stage].append(v)
                 except: pass
     for Requisition_Title,stages_stats in stats.items():
         for stage,scores in stages_stats.items():
@@ -325,12 +327,12 @@ def hv_av_scores_interview_stage(data):
 #satisfaction of interview by interview stage  RETHINK GRAPH, NOT WORKING  
 def hv_av_scores_interview_stage(data):    
     stats = dict()
-    role = 'Requisition_Title'
+    role = "Requisition_Title"
     stages = [
-        'Satisfaction online assessments',
-        'Technical phone interview satisfaction',
-        'Recruiter phone interview satisfaction',
-        'Satisfaction face to face interviews',
+        "Satisfaction online assessments",
+        "Technical phone interview satisfaction",
+        "Recruiter phone interview satisfaction",
+        "Satisfaction face to face interviews",
     ]
     for d in data:
         if role not in stats:
@@ -340,7 +342,7 @@ def hv_av_scores_interview_stage(data):
         for stage in stages:
             if stage in d:
                 try:
-                    v = float(d[stage].split('-', 1)[0].strip())
+                    v = float(d[stage].split("-", 1)[0].strip())
                     stats[role][stage].append(v)
                 except: pass
     for Requisition_Title,stages_stats in stats.items():

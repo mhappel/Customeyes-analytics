@@ -9,33 +9,43 @@ import customeyes
 import customeyes_plots
 import wx
 
-line_series = [
-    ['Recruitment process'],
-    ['Degree difficulty interviews'],
-    ['Fast application process'],
-    [
-        'Interviewers were friendly',
-        'Interviewers were professional',
-        'Interviewers were interested in my unique skills',
-        'Interviewers were interested in my experience',
-    ], 
-    [
-        'Customer oriented',
-        'Innovative',
-        'Data driven',
-        'Getting things done',
-        'Humble and open atmosphere',    
-    ],
-    [
-        'Satisfaction feedback',
-        'Feedback concrete',
-        'Feedback recognizable',
-    ],
-]
 
-bar_series = ["Recruitment process","Degree difficulty interviews", "Fast application process"]
-
-barx_series = ["Source", "Completion status", "Rejection Reason", "Number of interviews", "Degree difficulty interviews"] 
+category_info = {
+    1: {
+        "show_all": True,
+        "series": [
+            ["Recruitment process"],
+            ["Degree difficulty interviews"],
+            ["Fast application process"],
+            [
+                "Interviewers were friendly",
+                "Interviewers were professional",
+                "Interviewers were interested in my unique skills",
+                "Interviewers were interested in my experience",
+            ], 
+            [
+                "Customer oriented",
+                "Innovative",
+                "Data driven",
+                "Getting things done",
+                "Humble and open atmosphere",    
+            ],
+            [
+                "Satisfaction feedback",
+                "Feedback concrete",
+                "Feedback recognizable",
+            ],
+        ]
+    },
+    2: {
+        "series":
+            ["Recruitment process","Degree difficulty interviews", "Fast application process"]
+    },
+    3: {
+        "series": 
+            ["Source", "Completion status", "Rejection Reason", "Number of interviews", "Degree difficulty interviews"] 
+    },
+}
 
 #Popup window for parameters (and graph)
 class Base_GraphWindow(wx.Frame):
@@ -49,6 +59,8 @@ class Base_GraphWindow(wx.Frame):
         
         super(Base_GraphWindow, self).__init__(parent, ID, title, pos, size, style)
         self.button_id = button_id
+        self.category = button_id/100
+        self.series_idx = button_id - (self.category*100 + 1)
 
         self.panel = wx.Panel(self, -1)
         instruction = wx.StaticText(self.panel, -1, "Choose parameters for the graph", (15, 8))
@@ -56,7 +68,7 @@ class Base_GraphWindow(wx.Frame):
 
     def create_date_select(self, base_y):
        
-        month_choices = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        month_choices = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
         wx.StaticText(self.panel, -1, "Select Start Month:", (15, base_y + 5))
         self.startmonthch = wx.Choice(self.panel, -1, (125, base_y), choices = month_choices)
         self.startmonthch.SetSelection(10)
@@ -94,19 +106,19 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
     def __init__(self, parent, ID, title, button_id, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE):
         super(Line_Hbar_GraphWindow, self).__init__(parent, ID, title, button_id, pos, size, style)
 
-        choices = ['By Application Date', 'By Rejection Date']
+        choices = ["By Application Date", "By Rejection Date"]
         self.datesch = wx.Choice(self.panel, -1, (15, 35), choices = choices)
         self.datesch.SetSelection(0)
         self.Bind(wx.EVT_CHOICE, self.on_parameter_change, self.datesch)
 
         self.create_date_select(70)
 
-        if self.button_id < 200:
+        if category_info[self.category].get("show_all", False):
             self.roles = ["All"] + app.roles
         else:
             self.roles = app.roles
 
-        if self.button_id > 200 or len(line_series[self.button_id - 101]) == 1:        
+        if self.button_id > 200 or len(category_info[self.category]["series"][self.series_idx]) == 1:        
             self.rolelb = wx.CheckListBox(self.panel, -1, (15,140), (450,150), self.roles)
             self.Bind(wx.EVT_CHECKLISTBOX, self.on_role_select, self.rolelb)
             #self.rolelb.SetCheckedItems([0])
@@ -131,7 +143,7 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
         if len(self.rolelb.GetCheckedItems()) > max_choice:
             self.rolelb.Check(event.GetSelection(),False)
             max_alert = "{:} {:} {:}".format("Cannot select more than", max_choice, "items") 
-            dlg = wx.MessageDialog(self, max_alert, 'Alert', wx.OK | wx.ICON_EXCLAMATION)                              
+            dlg = wx.MessageDialog(self, max_alert, "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
             dlg.ShowModal()
             dlg.Destroy()
      
@@ -150,7 +162,7 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
         end_date = datetime.date(end_year, end_month, 1)        
         
         if start_date > end_date:
-            dlg = wx.MessageDialog(self, "Cannot select End Date before Start Date.", 'Alert', wx.OK | wx.ICON_EXCLAMATION)                              
+            dlg = wx.MessageDialog(self, "Cannot select End Date before Start Date.", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
             dlg.ShowModal()
             dlg.Destroy()
             return
@@ -158,7 +170,7 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
         stats = customeyes.create_month_axes(start_date, end_date)
         
         #pprint.pprint(line_series[self.button_id - 101])
-        series = line_series[self.button_id - 101]      
+        series = category_info[self.category]["series"][self.series_idx]    
         
         if len(series) == 1:
             selected_roles = list()
@@ -198,12 +210,12 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
             customeyes.draw_lineplot(stats, date_column_name, series[0], title)
             customeyes_plots.plt.show() 
         else:
-            dlg = wx.MessageDialog(self, "No data available for this role", 'Alert', wx.OK | wx.ICON_EXCLAMATION)                              
+            dlg = wx.MessageDialog(self, "No data available for this role", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
             dlg.ShowModal()
             dlg.Destroy()
 
     def On_publish_hbar_chart(self,event):
-        #score_column_name = 'Degree difficulty interviews'
+        #score_column_name = "Degree difficulty interviews"
              
         start_year = int(self.startyearch.GetStringSelection())
         start_month = self.startmonthch.GetSelection() + 1
@@ -214,7 +226,7 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
         end_date = datetime.date(end_year, end_month, 1)        
         
         if start_date > end_date:
-            dlg = wx.MessageDialog(self, "Cannot select End Date before Start Date.", 'Alert', wx.OK | wx.ICON_EXCLAMATION)                              
+            dlg = wx.MessageDialog(self, "Cannot select End Date before Start Date.", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
             dlg.ShowModal()
             dlg.Destroy()
             return
@@ -224,7 +236,7 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
         for role_idx in self.rolelb.GetCheckedItems():
             selected_roles.append(self.roles[role_idx])
 
-        score_column_name = bar_series[self.button_id - 201]
+        score_column_name = category_info[self.category]["series"][self.series_idx]
         stats = customeyes.hbar_role_averages(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_titles = selected_roles)
         
         has_data = False
@@ -233,7 +245,7 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
             customeyes.draw_hbarplot(stats, score_column_name, title)
             customeyes_plots.plt.show() 
         else:
-            dlg = wx.MessageDialog(self, "No data available", 'Alert', wx.OK | wx.ICON_EXCLAMATION)                              
+            dlg = wx.MessageDialog(self, "No data available", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
             dlg.ShowModal()
             dlg.Destroy()
 
@@ -244,10 +256,10 @@ class Bar_GraphWindow(Base_GraphWindow):
 
         self.create_date_select(35) 
 
-        if self.button_id == 205:
-            choices = ['By Source', 'By Completion Status', 'By Rejection Reason', 'By Number of Interviews']
+        if self.button_id == 302:
+            choices = ["By Source", "By Completion Status", "By Rejection Reason", "By Number of Interviews"]
         else:
-            choices = ['By Source', 'By Completion Status', 'By Rejection Reason', 'By Number of Interviews', 'By Difficulty Interviews']
+            choices = ["By Source", "By Completion Status", "By Rejection Reason", "By Number of Interviews", "By Difficulty Interviews"]
         
         self.choicech = wx.Choice(self.panel, -1, (15, 105), choices = choices)
         self.choicech.SetSelection(0)
@@ -274,10 +286,11 @@ class Bar_GraphWindow(Base_GraphWindow):
         end_month = self.endmonthch.GetSelection() + 1
         end_date = datetime.date(end_year, end_month, 1) 
 
-        x_series = barx_series[self.choicech.GetSelection()]  
+        x_series = category_info[self.category]["series"][self.choicech.GetSelection()] 
+        print x_series
   
         if start_date > end_date:
-            dlg = wx.MessageDialog(self, "Cannot select End Date before Start Date.", 'Alert', wx.OK | wx.ICON_EXCLAMATION)                              
+            dlg = wx.MessageDialog(self, "Cannot select End Date before Start Date.", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
             dlg.ShowModal()
             dlg.Destroy()
             return
@@ -291,7 +304,7 @@ class Bar_GraphWindow(Base_GraphWindow):
             role_title = app.roles[role_idx]
             title = "{:} {:}".format(self.GetLabel(), role_title)
 
-        score_column_name = bar_series[self.button_id - 204] 
+        score_column_name = category_info[self.category]["series"][self.series_idx - 1]
         stats = customeyes.barchart_average_scores(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, x_series = x_series, role_title = role_title)
         
         has_data = False
@@ -300,7 +313,7 @@ class Bar_GraphWindow(Base_GraphWindow):
             customeyes.draw_barplot(stats, score_column_name, title)
             customeyes_plots.plt.show() 
         else:
-            dlg = wx.MessageDialog(self, "No data available", 'Alert', wx.OK | wx.ICON_EXCLAMATION)                              
+            dlg = wx.MessageDialog(self, "No data available", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
             dlg.ShowModal()
             dlg.Destroy()
 
@@ -358,7 +371,7 @@ class MyFrame(wx.Frame):
         fbqualitybtn = wx.Button(panel1, 106, "Feedback Quality")
         self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbqualitybtn)
         
-        #compare roles
+        #compare roles , category 2
         text_other = wx.StaticText(panel1, -1, "Compare Roles")
         text_other.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_other.SetSize(text_other.GetBestSize())
@@ -369,26 +382,26 @@ class MyFrame(wx.Frame):
         fastiv2btn = wx.Button(panel1, 203, "Fast application process")
         self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, fastiv2btn)
 
-        #vertical bar charts per role
+        #vertical bar charts per role category 3
         text_corr = wx.StaticText(panel2, -1, "Bar Charts by Role")
         text_corr.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_corr.SetSize(text_corr.GetBestSize())
-        barprocbtn = wx.Button(panel2, 204, "Averages Recruitment process scores")
+        barprocbtn = wx.Button(panel2, 301, "Averages Recruitment process scores")
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barprocbtn)
-        bardifbtn = wx.Button(panel2, 205, "Averages Difficulty Interviews")
+        bardifbtn = wx.Button(panel2, 302, "Averages Difficulty Interviews")
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, bardifbtn)
-        barfstbtn = wx.Button(panel2, 206, "Average scores speed process")
+        barfstbtn = wx.Button(panel2, 303, "Average scores speed process")
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barfstbtn) 
 
-        #standalone graphs
+        #standalone graphs new categories
         text_role = wx.StaticText(panel2, -1, "Standalone graphs") #need to make per role as well
         text_role.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_role.SetSize(text_role.GetBestSize())
-        fbreceivedbtn = wx.Button(panel2, 207, "Feedback recieved?")
+        fbreceivedbtn = wx.Button(panel2, 401, "Feedback recieved?")
         self.Bind(wx.EVT_BUTTON, self.feedback_recieved, fbreceivedbtn)
-        scoredistbtn = wx.Button(panel2, 208, "Overall Score Distribution")
+        scoredistbtn = wx.Button(panel2, 501, "Overall Score Distribution")
         self.Bind(wx.EVT_BUTTON, self.month_score_dist, scoredistbtn)
-        statusbtn = wx.Button(panel2, 209, "Distribution Rejected, Offered & Hired")
+        statusbtn = wx.Button(panel2, 402, "Distribution Rejected, Offered & Hired")
         self.Bind(wx.EVT_BUTTON, self.completion_status, statusbtn)
 
         # Use a sizer to layout the controls, stacked vertically and with
@@ -473,7 +486,7 @@ class MyApp(wx.App):
         return True
      
     def init_roles(self):
-        role_column_name = 'Requisition_Title'
+        role_column_name = "Requisition_Title"
         role_set = set()
         for d in self.data:
             role_set.add(d[role_column_name])
