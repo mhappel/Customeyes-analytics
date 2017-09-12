@@ -188,8 +188,8 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
                 role_title = None
                 title = "{:} {:}".format(self.GetLabel(), "All Roles")
             else:
-                role_title = app.roles[role_idx]
-                title = "{:} {:}".format(self.GetLabel(), role_title)
+                role_title = app.roles[role_idx - 1]
+                title = "{:} - {:}".format(self.GetLabel(), role_title)
             
             for s in series:
                 customeyes.line_month_averages(app.data, date_column_name, s, start_date = start_date, end_date = end_date, stats = stats, series_name =  s, role_title = role_title)
@@ -298,7 +298,7 @@ class Bar_GraphWindow(Base_GraphWindow):
             title = "{:} {:}".format(self.GetLabel(), "All Roles")
         else:
             role_title = app.roles[role_idx]
-            title = "{:} {:}".format(self.GetLabel(), role_title)
+            title = "{:} - {:}".format(self.GetLabel(), role_title)
 
         score_column_name = category_info[self.category - 1]["series"][self.series_idx]
         stats = customeyes.barchart_average_scores(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, x_series = x_series, role_title = role_title)
@@ -312,6 +312,66 @@ class Bar_GraphWindow(Base_GraphWindow):
             dlg = wx.MessageDialog(self, "No data available", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
             dlg.ShowModal()
             dlg.Destroy()
+
+class Pie_ChartWindow(Base_GraphWindow): #TO DO connect with button ID's to feedback received and completion status
+
+    def __init__(self, parent, ID, title, button_id, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE):
+        super(Pie_ChartWindow, self).__init__(parent, ID, title, button_id, pos, size, style)
+
+        self.create_date_select(35) 
+      
+        self.roles = ["All"] + app.roles
+
+        self.rolelb = wx.ListBox(self.panel, -1, (15,105), (450,150), self.roles, wx.LB_SINGLE)
+        self.Bind(wx.EVT_LISTBOX, self.on_parameter_change, self.rolelb)
+        self.rolelb.SetSelection(0)
+        
+        publishbtn = wx.Button(self.panel, -1, "Show Chart", (15,320))
+        self.Bind(wx.EVT_BUTTON, self.On_publish_pie_chart, publishbtn)
+
+    def On_publish_pie_chart(self, event):
+            
+        date_column_name = "Application Date"
+        
+        start_year = int(self.startyearch.GetStringSelection())
+        start_month = self.startmonthch.GetSelection() + 1
+        start_date = datetime.date(start_year, start_month, 1)
+
+        end_year = int(self.endyearch.GetStringSelection())
+        end_month = self.endmonthch.GetSelection() + 1
+        end_date = datetime.date(end_year, end_month, 1) 
+  
+        if start_date > end_date:
+            dlg = wx.MessageDialog(self, "Cannot select End Date before Start Date.", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
+            dlg.ShowModal()
+            dlg.Destroy()
+            return
+ 
+        role_idx = self.rolelb.GetSelection()
+        if role_idx == 0:
+            role_title = None
+        else:
+            role_title = app.roles[role_idx -1]
+
+        score_column_name =  "Received feedback" #remove when connected to button ID
+        stats, count = customeyes.pie_chart_calc(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_title = role_title)
+
+        title = self.GetLabel()
+        if role_idx == 0:
+            title = "{:} - {:} ({:} records)".format(self.GetLabel(), "All Roles", count)
+        else:
+            title = "{:} - {:} ({:} records)".format(self.GetLabel(), role_title, count)
+
+        has_data = False
+        
+        if len(stats) > 0:
+            customeyes.draw_pieplot(stats, title)
+            customeyes_plots.plt.show() 
+        else:
+            dlg = wx.MessageDialog(self, "No data available", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
+            dlg.ShowModal()
+            dlg.Destroy()    
+
 
 class MyFrame(wx.Frame):
     """
@@ -392,14 +452,14 @@ class MyFrame(wx.Frame):
         fbqualitybtn = wx.Button(panel2, 106, "Feedback Quality")
         self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbqualitybtn)
         fbreceivedbtn = wx.Button(panel2, 401, "Feedback recieved?")
-        self.Bind(wx.EVT_BUTTON, self.feedback_recieved, fbreceivedbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnPieChart, fbreceivedbtn)
 
         #standalone graphs new categories
         text_other = wx.StaticText(panel2, -1, "Standalone graphs \n(more graphs to be added)") #need to make per role as well
         text_other.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_other.SetSize(text_other.GetBestSize())
         statusbtn = wx.Button(panel2, 402, "Distribution Rejected, Offered & Hired")
-        self.Bind(wx.EVT_BUTTON, self.completion_status, statusbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnPieChart, statusbtn)
 
         # Use a sizer to layout the controls, stacked vertically and with
         # a 10 pixel border around each. Order of buttons to be determined here
@@ -457,6 +517,10 @@ class MyFrame(wx.Frame):
         win = Bar_GraphWindow(self, -1, evt.GetEventObject().GetLabel(), evt.GetId(), size=(500, 400), style = wx.DEFAULT_FRAME_STYLE)
         win.Show(True)       
 
+    def OnPieChart (self, evt):
+        win = Pie_ChartWindow(self, -1, evt.GetEventObject().GetLabel(), evt.GetId(), size=(500, 400), style = wx.DEFAULT_FRAME_STYLE)
+        win.Show(True)
+
     def month_score_dist(self, evt):
         data = customeyes.load_data_json()
         customeyes.month_score_dist(data)
@@ -464,7 +528,7 @@ class MyFrame(wx.Frame):
 
     def feedback_recieved(self, evt):
         data = customeyes.load_data_json()
-        customeyes.feedback_recieved(data)
+        customeyes.pie_chart_calc(data)
         customeyes_plots.plt.show() 
 
     def completion_status(self, evt):
@@ -498,4 +562,3 @@ class MyApp(wx.App):
  
 app = MyApp(redirect=True)
 app.MainLoop()
-

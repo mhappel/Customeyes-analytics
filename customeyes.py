@@ -240,7 +240,45 @@ def draw_barplot(stats, score_column_name, title):
     
     customeyes_plots.barplot(stats, "{:}".format(title), ylabel = "From {:} (0) to {:} (10)".format(*ylabels), bar_width = 0.75, sort_key = lambda (k,(v,c)): -v) #TO DO: Change the generation of title
 
-  
+
+#Pie charts per role
+def pie_chart_calc(data, score_column_name = None, stats = None, start_date = None, end_date = None,  role = "Requisition_Title", series_name = None, role_title = None):
+    
+    stats = dict()
+    count = 0
+
+    if start_date is None:
+        start_date = datetime.date(2016,11,1)
+
+    if series_name is None:
+        series_name = role_title or "All Roles"
+
+    for d in data:
+        if role_title is not None and d[role] != role_title:
+            continue
+        
+        month = dates_setting(d,"Application Date")
+        if month is None or month < start_date or (end_date is not None and month > end_date): 
+            continue
+           
+        if score_column_name in d:
+            v = d[score_column_name]
+            if v not in stats:
+                stats[v] = 0
+            stats[v] += 1
+            count += 1
+
+    for keys,occ in stats.items():
+        stats[keys] = (float(occ)/count)*100
+
+    return stats, count
+    
+def draw_pieplot(stats, title):
+    customeyes_plots.pieplot(stats, title)
+
+
+
+
 #Histogram scores overall recruitment process
 #TO DO: make it per role
 def month_score_dist(data):    
@@ -268,33 +306,11 @@ def month_score_dist(data):
     customeyes_plots.histoplot(stats, "Distribution scores \"Recruitment Process\"",ylabel="%",data_label=lambda k: k[1])
 
 
-def feedback_recieved(data):
-    stats = {"Yes":0, "No":0}
-    count = 0
-    for d in data:
-        if "Received feedback" in d:
-            v = d["Received feedback"]
-            stats[v] += 1
-            count += 1
-    
-    for keys,occ in stats.items():
-        stats[keys] = (float(occ)/count)*100
-    
-    customeyes_plots.pieplot(stats, "Feedback Received?")
 
-def completion_status(data):
-    stats = {"Rejected":0, "Offer accepted":0, "Offer declined":0}
-    count = 0
-    for d in data:
-        if "Completion status" in d:
-            v = d["Completion status"]
-            stats[v] += 1
-            count += 1
-    
-    for keys,occ in stats.items():
-        stats[keys] = (float(occ)/count)*100
-    
-    customeyes_plots.pieplot(stats, "Completion status")    
+
+
+
+
 
 #satisfaction of interview by interview stage - in progress
 def hv_av_scores_interview_stage(data):    
@@ -374,7 +390,7 @@ def main():
     #stats = booking_values(data)
     #draw_lineplot(stats, "Application Date", "Broken shit")
     
-    stage_satisfaction(data)
+    #stage_satisfaction(data)
     #iv_stage_satisfaction_rej_date(data)    
     #source_overall_scores(data)
     #month_score_dist(data)
@@ -384,7 +400,7 @@ def main():
         
     #with plt.xkcd():
 
-    customeyes_plots.plt.show()
+    #customeyes_plots.plt.show()
    
 if __name__ == "__main__":
     main()
