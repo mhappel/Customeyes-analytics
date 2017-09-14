@@ -47,6 +47,17 @@ category_info = {
     },
 }
 
+questions = ["\"Overall, I am satisfied with the recruitment process\"","\"I think Booking.com is...\"", "\"Do you read the technical blog?\"", 
+    "\"I found the content of the blog helpful in muy preparation\"", "\"I thought the blog gave me good insight in the technical challenges I would face\"", 
+    "\"It was clear to me what I could expect from the application procedure\"", "\"How many rounds of interviews have you had in total?\"", 
+    "\"Did you have online assessments?\"", "\"Overal, I am satisfied with the interview(s) I had\"", 
+    "\"Overall, I'm satisfied with the online assessment(s) I had\"", "\"The interviewers I communicated with...\"", 
+    "\"Could you describe the degree of difficulty of the interviews?\"", "\"I recieved feedback after/during my application\"", 
+    "\"Overall, I'm satisfied with the feedback I recieved\"", "\"Overall, I am satisfied with the offer I recieved\"",
+    "\"To what extend where you satisfied with the salary and benefits?\"", "\"It is clear what tasks belong to the job I accepted\"",
+    "\"The job letter was clear to me\"", "\"I recommend Booking.com as an Employer to others\"", "\"I recommend others to book accomodations at Booking.com\""]
+
+
 #Popup window for parameters (and graph)
 class Base_GraphWindow(wx.Frame):
 
@@ -186,7 +197,7 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
             role_idx = self.rolelb.GetSelection()
             if role_idx == 0:
                 role_title = None
-                title = "{:} {:}".format(self.GetLabel(), "All Roles")
+                title = "{:} - {:}".format(self.GetLabel(), "All Roles")
             else:
                 role_title = app.roles[role_idx - 1]
                 title = "{:} - {:}".format(self.GetLabel(), role_title)
@@ -295,9 +306,9 @@ class Bar_GraphWindow(Base_GraphWindow):
         role_idx = self.rolelb.GetSelection()
         if role_idx == 0:
             role_title = None
-            title = "{:} {:}".format(self.GetLabel(), "All Roles")
+            title = "{:}\n{:} - {:}".format("test question", self.GetLabel(), "All Roles")
         else:
-            role_title = app.roles[role_idx]
+            role_title = app.roles[role_idx - 1]
             title = "{:} - {:}".format(self.GetLabel(), role_title)
 
         score_column_name = category_info[self.category - 1]["series"][self.series_idx]
@@ -406,7 +417,7 @@ class MyFrame(wx.Frame):
 
 
         #Overal recruitment process scores analytics
-        text_process = wx.StaticText(panel1, -1, "\"My overall experience of the \nprocess was good\"") 
+        text_process = wx.StaticText(panel1, -1, "Overall satisfaction recruitment process") 
         text_process.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_process.SetSize(text_process.GetBestSize())
         trendbtn = wx.Button(panel1, 101, "Compare average monthly scores by role")
@@ -419,7 +430,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.month_score_dist, scoredistbtn)
 
         #Difficulty interviews analytics
-        text_diff = wx.StaticText(panel1, -1, "Degree Difficulty Interviews") #rename text variable
+        text_diff = wx.StaticText(panel1, 11, "\"Degree of difficulty of interviews") 
         text_diff.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_diff.SetSize(text_diff.GetBestSize())
         ivdifbtn = wx.Button(panel1, 102, "Compare average monthly scores by role")
@@ -430,7 +441,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, bardifbtn)
 
         #Speed interviews analytics
-        text_fast = wx.StaticText(panel1, -1, "\"I had a fast interview process\"") 
+        text_fast = wx.StaticText(panel1, 12, "\"I had the feeling that Booking.com acts fast\"") 
         text_fast.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_fast.SetSize(text_fast.GetBestSize())
         fastivbtn = wx.Button(panel1, 103, "Compare average monthly scores by role")
@@ -441,7 +452,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barfstbtn) 
 
         #Feedback analytics
-        text_fb = wx.StaticText(panel2, -1, "Feedback on Booking.com, \ninterviews and feedback") 
+        text_fb = wx.StaticText(panel2, 13, "Feedback on Booking.com, \ninterviews and feedback") 
         text_fb.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_fb.SetSize(text_fb.GetBestSize())        
         ivfbbtn = wx.Button(panel2, 104, "Interviewer Feedback")
@@ -455,7 +466,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnPieChart, fbreceivedbtn)
 
         #standalone graphs new categories
-        text_other = wx.StaticText(panel2, -1, "Standalone graphs \n(more graphs to be added)") #need to make per role as well
+        text_other = wx.StaticText(panel2, 14, "Standalone graphs \n(more graphs to be added)") #need to make per role as well
         text_other.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_other.SetSize(text_other.GetBestSize())
         statusbtn = wx.Button(panel2, 402, "Distribution Rejected, Offered & Hired")
@@ -560,7 +571,7 @@ class MyApp(wx.App):
         self.roles = sorted(role_set)
 
         #for role_title in self.roles:
-         #   print role_title
+        #    print role_title
         
  
 app = MyApp(redirect=True)
