@@ -558,6 +558,9 @@ class MyApp(wx.App):
         for d in self.data:
             role_set.add(d[role_column_name])
         self.roles = sorted(role_set)
+
+        #for role_title in self.roles:
+         #   print role_title
         
  
 app = MyApp(redirect=True)

@@ -5,7 +5,58 @@ import datetime
 import customeyes_plots
 import pprint
 
-role_prefix_blacklist = ["Accommodation Service Executive", "Commercial Owner", "Customer Service Executive"]
+role_prefix_blacklist = ["Accommodation Service Executive", "Commercial Owner", "Customer Service Executive", "Graduate Commercial Owner", 
+    "Operations Analyst - Translations and Content Agency", "Operations Coordinator - Freelance Recruitment", "Partner Marketing (CRM) (Marketing Database Specialist)",
+    "Process Specialist Inbound", "Recruiter - Headquarters", "Seasonal Customer Relations Associate *Internal*", "Sourcer - Global Leadership", 
+    "Sr. Specialist Partner Marketing & Partner Activations", "Topic Specialist - Operations *Internal*", "Customer Service Business"]
+
+role_title_map = {
+    "Back End Developers (Referrals only)":             "Back End Developer", 
+    "Back End Developers / Referrals":                  "Back End Developer",
+    "Software Developer (Headhunts only)":              "Back End Developer",
+    "Software Developer- Headhunts only":               "Back End Developer",
+    "Software Engineer":                                "Back End Developer",
+    "Perl Developer":                                   "Back End Developer",
+    "Software Developer":                               "Back End Developer",
+    "Sr. Software Engineer":                            "Sr. Software Developer",
+    "Business Applications Specialist":                 "IT Business Applications Engineer",
+    "Enterprise Applications Developer":                "IT Business Applications Engineer",
+    "Enterprise Applications Developer (BusApps - ITS)":"IT Business Applications Engineer",
+    "Front End Developer (Headhunts only)":             "Front End Developer",
+    "Front End Developer *Headhunts*":                  "Front End Developer",
+    "IT Business Applications Specialist":              "IT Business Applications Engineer",
+    "Data Center Engineer - UK (Netw - CoreInfra)":     "Data Center Engineer - UK",
+    "Data Scientist Machine Learning":                  "Data Scientist - Machine Learning",
+    "Data Scientist - General (Headhunts only)":        "Data Scientist - General",
+    "Data Scientist Online Advertising":                "Data Scientist - Online Advertising",
+    "IT Support Desk Technician - Berlin (Support - ITS)": "IT Support Desk Technician - Berlin",
+    "Internship User Research":                         "Internship - User Research",
+    "Network Engineer (Netw - CoreInfra)":              "Network Engineer",
+    "Network Tools Developer (NetOffices - ITS)":       "Network Tools Developer - IT Services",
+    "Network Tools and Automation Engineer (NetOffices - ITS)": "Network Tools Developer - IT Services",
+    "Product Owner E-commerce (Referrals only)":        "Product Owner E-commerce",
+    "Referral Product Owner E-commerce":                "Product Owner E-commerce",
+    "Sr. Devops Engineer (Monitoring - ITS)":           "Sr. Devops Engineer",
+    "Sr. Software Engineer":                            "Sr. Software Developer",
+    "Systems Engineer (Platform - ITS)":                "Systems Engineer - Platform",
+    "UX Designer (Headhunts only)":                     "UX Designer",
+    "UX Designer - Headhunts only":                     "UX Designer",
+    "Wireless Network Engineer (NetOffices - ITS)":     "Wireless Network Engineer",
+    "(Event - Women in Tech) UX Designer":              "Event - Women in Tech - UX Designer",
+    "(Event) Assessment Days Mexico City":              "Event - Assessment Day - Mexico City",
+    "(Event) Copywriters - Women in Tech Hackathon":    "Event - Women in Tech - Hackathon - Copywriters",
+    "(Event) Hackathon Munich":                         "Event - Hackathon - Munich",
+    "(Event) Mexico Hackathon":                         "Event - Hackathon - Mexico",
+    "(Event) Taipei Hackathon":                         "Event - Hackathon - Taipei",
+    "Taipei Software Developers":                       "Event - Hackathon - Taipei - Software Developer",
+    "(Event) Technology Interview Day Guadalajara":     "Event - Technology Interview Day - Guadalajara",
+    "(Event) Women in Tech Hackathon":                  "Event - Women in Tech - Hackathon",
+    "(Event) Women in Tech: Front End Developer":       "Event - Women in Tech - Front End Developer",
+    "Assessment day South Africa":                      "Event - Assessment Day - South Africa",
+    "HACK WITH PRIDE":                                  "Event - Hackathon - Hack With Pride",
+    "Hack a Holiday - Manila Edition":                  "Event - Hackathon - Manila",
+    "Product Owner (Women in Tech)":                    "Event - Women in Tech - Product Owner",
+}
 
 #loading data from Excel
 def load_data():
@@ -35,6 +86,8 @@ def load_data():
                 d = None
                 break
         if d is not None and len(d)>0:
+            d["Requisition_Title"] = role_title_map.get(d["Requisition_Title"], d["Requisition_Title"])
+
             data.append(d)
     return data
  
@@ -145,7 +198,8 @@ def draw_lineplot(stats, date_column_name, score_column_name, title):
     else:
         ylabels = ("Strongly Disagree", "Strongly Agree")
     
-    customeyes_plots.lineplot(stats, "{:}".format(title), ylabel = "From {:} (0) to {:} (10)".format(*ylabels), xlabel = "By {:}".format(date_column_name), bottom = 0, top = 10) 
+    customeyes_plots.lineplot(stats, "{:}".format(title), ylabel = "From {:} (0) to {:} (10)".format(*ylabels), 
+        xlabel = "By {:}".format(date_column_name), bottom = 0, top = 10) 
         
 #bar charts               
 def hbar_role_averages(data, score_column_name = None, stats = None, start_date = None, end_date = None, series_name = None, role = "Requisition_Title", role_titles = None): 
@@ -193,7 +247,7 @@ def draw_hbarplot(stats, score_column_name, title):
     customeyes_plots.hbarplot(stats, "{:}".format(title), xlabel = "From {:} (0) to {:} (10)".format(*xlabels), sort_key = lambda (k,(v,c)): v, left = 0, right = 10) 
 
 #TO DO: insert data selection possibility and graphs per role and choice between source and completion status
-def barchart_average_scores(data, score_column_name = None, stats = None, start_date = None, end_date = None,  roles = "Requisition_Title", series_name = None, x_series = None, role_title = None):    
+def barchart_average_scores(data, score_column_name = None, stats = None, start_date = None, end_date = None, roles = "Requisition_Title", series_name = None, x_series = None, role_title = None):    
     stats = dict()
 
     if start_date is None:
@@ -375,9 +429,9 @@ def hv_av_scores_interview_stage(data):
 
  
 def main():
-    #data = load_data()
-    data = load_data_json()
-    #dump_data(data)
+    data = load_data()
+    #data = load_data_json()
+    dump_data(data)
     
     #stats = dict()
     #line_month_averages(data, "Application Date", "Recruitment process", stats = stats)
