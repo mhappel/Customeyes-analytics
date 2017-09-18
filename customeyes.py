@@ -180,7 +180,6 @@ def line_month_averages(data, date_column_name, score_column_name, stats = None,
             stats[month] = dict()
         if series_name not in stats[month]:
             stats[month][series_name] = list()
-        #print score_column_name, repr(d[score_column_name])
         score = score_parser(d,score_column_name)    
         if score is not None:    
             stats[month][series_name].append(score) 
@@ -190,6 +189,7 @@ def line_month_averages(data, date_column_name, score_column_name, stats = None,
         if series_name not in stats[month]:
             stats[month][series_name] = None
     
+    pprint.pprint(stats)
     return stats
  
 def draw_lineplot(stats, date_column_name, score_column_name, title):

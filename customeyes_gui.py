@@ -35,27 +35,103 @@ category_info = {
                 "Feedback concrete",
                 "Feedback recognizable",
             ],
-        ]
+            [   "I found the content of the blog helpful in my prep...",
+                "I thought that the booking.com blog gave me a good...",
+            ],
+            [   "Satisfaction online assessments",
+                "Recruiter phone interview satisfaction",
+                "Technical phone interview satisfaction",
+                "Satisfaction face to face interviews",
+            ],
+        ],
+        "labels": [
+            ["Overall recruitment process"],
+            ["Overall degree difficulty interviews"],
+            ["Perception speed application process"],
+            [
+                "...were friendly",
+                "...were professional",
+                "...were interested in my unique skills",
+                "...were interested in my experience",
+            ], 
+            [
+                "...is customer oriented",
+                "...is innovative",
+                "...is data driven",
+                "...getting things done every day",
+                "...has a humble and open atmosphere",    
+            ],
+            [
+                "Overall, I'm satisfied with the feedback I received",
+                "The feedback I received was concrete and constructive",
+                "The feedback I received was recognizable/fair",
+            ],
+            [   "I found the blog helpful in my preparation",
+                "I thought the blog gave me a good insight in the challenges",
+            ],
+            [   "Online assessments",
+                "Recruiter phone screen",
+                "Technical phone interview",
+                "Face to face interviews",
+            ],
+        ],
+        "questions": [
+            "\"Overall, I am satisfied with the recruitment process\"",
+            "\"Could you describe the degree of difficulty of the interviews?\"", 
+            "\"I have the feeling that Booking.com acts fast\"",
+            "\"The interviewers I communicated with...\"", 
+            "\"I think Booking.com is...\"", 
+            "Feedback Quality",
+            "Feedback on Booking.com Tech Blog",
+            "\"Overal, I am satisfied with the interview(s) I had\"",
+        ],
     },
     2: {
         "series":
-            ["Recruitment process","Degree difficulty interviews", "Fast application process"]
+            ["Recruitment process","Degree difficulty interviews", "Fast application process"],
+        "questions": [
+            "\"Overall, I am satisfied with the recruitment process\"",
+            "\"Could you describe the degree of difficulty of the interviews?\"", 
+            "\"I have the feeling that Booking.com acts fast\"",
+            ],
     },
     3: {
         "series": 
-            ["Source", "Completion status", "Rejection Reason", "Number of interviews", "Degree difficulty interviews"] 
+            ["Source", "Completion status", "Rejection Reason", "Number of interviews", "Degree difficulty interviews"],
+        "series_labels":
+            ["By Source", "By Completion status", "By Rejection reason", "By Number of interviews", "By degree difficulty interviews"],
+        "questions": [
+            "\"Overall, I am satisfied with the recruitment process\"",
+            "\"Could you describe the degree of difficulty of the interviews?\"", 
+            "\"I have the feeling that Booking.com acts fast\"",
+            ],
+    },
+    4: {
+        "series":
+            ["Received feedback", "Completion status", "Did you read the booking.com technical blog?"],
+        "questions": [
+            "\"I recieved feedback after/during my application\"", 
+            "Distribution rejected, offered and hired",
+            "\"Did you read the technical blog?\"",
+            ],
     },
 }
 
-questions = ["\"Overall, I am satisfied with the recruitment process\"","\"I think Booking.com is...\"", "\"Do you read the technical blog?\"", 
-    "\"I found the content of the blog helpful in muy preparation\"", "\"I thought the blog gave me good insight in the technical challenges I would face\"", 
-    "\"It was clear to me what I could expect from the application procedure\"", "\"How many rounds of interviews have you had in total?\"", 
-    "\"Did you have online assessments?\"", "\"Overal, I am satisfied with the interview(s) I had\"", 
-    "\"Overall, I'm satisfied with the online assessment(s) I had\"", "\"The interviewers I communicated with...\"", 
-    "\"Could you describe the degree of difficulty of the interviews?\"", "\"I recieved feedback after/during my application\"", 
-    "\"Overall, I'm satisfied with the feedback I recieved\"", "\"Overall, I am satisfied with the offer I recieved\"",
-    "\"To what extend where you satisfied with the salary and benefits?\"", "\"It is clear what tasks belong to the job I accepted\"",
-    "\"The job letter was clear to me\"", "\"I recommend Booking.com as an Employer to others\"", "\"I recommend others to book accomodations at Booking.com\""]
+# questions answered:
+#    "\"Overall, I am satisfied with the recruitment process\"","\"I think Booking.com is...\"", "\"The interviewers I communicated with...\"", 
+#    "\"Could you describe the degree of difficulty of the interviews?\"", "\"I recieved feedback after/during my application\"", 
+#    "\"Overall, I'm satisfied with the feedback I recieved\"", "\"I have the feeling that Booking.com acts fast\""]
+#    "\"Did you read the technical blog?\"", "\"I found the content of the blog helpful in my preparation\"", 
+#    "\"I thought the blog gave me good insight in the technical challenges I would face\"", 
+
+# questions to be answered:
+#    "\"Overal, I am satisfied with the interview(s) I had\"" => Made a graph per stage, but there is no column with this actual data.
+    
+# questions not yet answered in graphs: 
+#    "\"It was clear to me what I could expect from the application procedure\"", "\"How many rounds of interviews have you had in total?\"", 
+#    "\"Did you have online assessments?\"", "\"Overall, I am satisfied with the offer I recieved\"",
+#    "\"To what extend where you satisfied with the salary and benefits?\"", "\"It is clear what tasks belong to the job I accepted\"", 
+#    "\"The job offer letter was clear to me\"", "\"I recommend Booking.com as an Employer to others\"", "\"I recommend others to book accomodations at Booking.com\""
 
 
 #Popup window for parameters (and graph)
@@ -180,11 +256,13 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
         
         stats = customeyes.create_month_axes(start_date, end_date)
         
-        series = category_info[self.category]["series"][self.series_idx]    
+        series = category_info[self.category]["series"][self.series_idx]
+        labels = category_info[self.category]["labels"][self.series_idx]
+        question = category_info[self.category]["questions"][self.series_idx]   
         
         if len(series) == 1:
             selected_roles = list()
-            title = self.GetLabel()
+            title = question
             for role_idx in self.rolelb.GetCheckedItems():
                 if role_idx == 0:
                     selected_roles.append(None)
@@ -197,13 +275,13 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
             role_idx = self.rolelb.GetSelection()
             if role_idx == 0:
                 role_title = None
-                title = "{:} - {:}".format(self.GetLabel(), "All Roles")
+                title = "{:}\n{:}".format(question, "All Roles")
             else:
                 role_title = app.roles[role_idx - 1]
-                title = "{:} - {:}".format(self.GetLabel(), role_title)
+                title = "{:}\n{:}".format(question, role_title)
             
-            for s in series:
-                customeyes.line_month_averages(app.data, date_column_name, s, start_date = start_date, end_date = end_date, stats = stats, series_name =  s, role_title = role_title)
+            for idx,s in enumerate(series):
+                customeyes.line_month_averages(app.data, date_column_name, s, start_date = start_date, end_date = end_date, stats = stats, series_name = labels[idx], role_title = role_title)
 
         has_data = False
         
@@ -238,9 +316,11 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
             dlg.ShowModal()
             dlg.Destroy()
             return
-        
+ 
+        question = category_info[self.category]["questions"][self.series_idx]
+
         selected_roles = list()
-        title = self.GetLabel()
+        title = question
         for role_idx in self.rolelb.GetCheckedItems():
             selected_roles.append(self.roles[role_idx])
 
@@ -282,7 +362,7 @@ class Bar_GraphWindow(Base_GraphWindow):
         publishbtn = wx.Button(self.panel, -1, "Show Chart", (15,320))
         self.Bind(wx.EVT_BUTTON, self.On_publish_bar_chart, publishbtn)
 
-    def On_publish_bar_chart(self, event):
+    def On_publish_bar_chart(self, event): #TO DO: Fix titles
             
         date_column_name = "Application Date"
         
@@ -294,7 +374,10 @@ class Bar_GraphWindow(Base_GraphWindow):
         end_month = self.endmonthch.GetSelection() + 1
         end_date = datetime.date(end_year, end_month, 1) 
 
-        x_series = category_info[self.category]["series"][self.choicech.GetSelection()] 
+        x_series = category_info[self.category]["series"][self.choicech.GetSelection()]
+        question = category_info[self.category]["questions"][self.series_idx]
+        series_label = category_info[self.category]["series_labels"][self.choicech.GetSelection()]
+
   
         if start_date > end_date:
             dlg = wx.MessageDialog(self, "Cannot select End Date before Start Date.", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
@@ -306,10 +389,10 @@ class Bar_GraphWindow(Base_GraphWindow):
         role_idx = self.rolelb.GetSelection()
         if role_idx == 0:
             role_title = None
-            title = "{:}\n{:} - {:}".format("test question", self.GetLabel(), "All Roles")
+            title = "{:}\n{:} for {:}".format(question, series_label, "All Roles")
         else:
             role_title = app.roles[role_idx - 1]
-            title = "{:} - {:}".format(self.GetLabel(), role_title)
+            title = "{:}\n{:} for {:}".format(question, series_label, role_title)
 
         score_column_name = category_info[self.category - 1]["series"][self.series_idx]
         stats = customeyes.barchart_average_scores(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, x_series = x_series, role_title = role_title)
@@ -324,7 +407,7 @@ class Bar_GraphWindow(Base_GraphWindow):
             dlg.ShowModal()
             dlg.Destroy()
 
-class Pie_ChartWindow(Base_GraphWindow): #TO DO connect with button ID's to feedback received and completion status
+class Pie_ChartWindow(Base_GraphWindow):
 
     def __init__(self, parent, ID, title, button_id, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE):
         super(Pie_ChartWindow, self).__init__(parent, ID, title, button_id, pos, size, style)
@@ -364,14 +447,15 @@ class Pie_ChartWindow(Base_GraphWindow): #TO DO connect with button ID's to feed
         else:
             role_title = app.roles[role_idx -1]
 
-        score_column_name =  "Received feedback" #remove when connected to button ID
+        score_column_name = category_info[self.category]["series"][self.series_idx]
         stats, count = customeyes.pie_chart_calc(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_title = role_title)
-
-        title = self.GetLabel()
+        question = category_info[self.category]["questions"][self.series_idx]
+        
+        title = question
         if role_idx == 0:
-            title = "{:} - {:} ({:} records)".format(self.GetLabel(), "All Roles", count)
+            title = "{:}\n{:} ({:} records)".format(question, "All Roles", count)
         else:
-            title = "{:} - {:} ({:} records)".format(self.GetLabel(), role_title, count)
+            title = "{:}\n{:} ({:} records)".format(question, role_title, count)
 
         has_data = False
         
@@ -420,56 +504,65 @@ class MyFrame(wx.Frame):
         text_process = wx.StaticText(panel1, -1, "Overall satisfaction recruitment process") 
         text_process.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_process.SetSize(text_process.GetBestSize())
-        trendbtn = wx.Button(panel1, 101, "Compare average monthly scores by role")
+        trendbtn = wx.Button(panel1, 101, "Compare monthly averages")
         self.Bind(wx.EVT_BUTTON, self.OnLineGraph, trendbtn)
         overallbtn = wx.Button(panel1, 201, "Compare roles")
         self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, overallbtn)
-        barprocbtn = wx.Button(panel1, 301, "Compare averages and correlations by role")
+        barprocbtn = wx.Button(panel1, 301, "Correlate by role")
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barprocbtn)
         scoredistbtn = wx.Button(panel1, 501, "Distribution of scores")
         self.Bind(wx.EVT_BUTTON, self.month_score_dist, scoredistbtn)
 
         #Difficulty interviews analytics
-        text_diff = wx.StaticText(panel1, 11, "\"Degree of difficulty of interviews") 
+        text_diff = wx.StaticText(panel1, -1, "Degree of difficulty of interviews") 
         text_diff.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_diff.SetSize(text_diff.GetBestSize())
-        ivdifbtn = wx.Button(panel1, 102, "Compare average monthly scores by role")
+        ivdifbtn = wx.Button(panel1, 102, "Compare monthly averages")
         self.Bind(wx.EVT_BUTTON, self.OnLineGraph, ivdifbtn)
         ivdif2btn = wx.Button(panel1, 202, "Compare roles")
         self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, ivdif2btn)
-        bardifbtn = wx.Button(panel1, 302, "Compare averages and correlations by role")
+        bardifbtn = wx.Button(panel1, 302, "Correlate by role")
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, bardifbtn)
 
         #Speed interviews analytics
-        text_fast = wx.StaticText(panel1, 12, "\"I had the feeling that Booking.com acts fast\"") 
+        text_fast = wx.StaticText(panel1, -1, "Perception speed application process") 
         text_fast.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_fast.SetSize(text_fast.GetBestSize())
-        fastivbtn = wx.Button(panel1, 103, "Compare average monthly scores by role")
+        fastivbtn = wx.Button(panel1, 103, "Compare monthly averages")
         self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fastivbtn)
         fastiv2btn = wx.Button(panel1, 203, "Compare roles")
         self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, fastiv2btn)
-        barfstbtn = wx.Button(panel1, 303, "Compare averages and correlations by role")
+        barfstbtn = wx.Button(panel1, 303, "Correlate by role")
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barfstbtn) 
 
         #Feedback analytics
-        text_fb = wx.StaticText(panel2, 13, "Feedback on Booking.com, \ninterviews and feedback") 
+        text_fb = wx.StaticText(panel2, 13, "Feedback on Interviews") 
         text_fb.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_fb.SetSize(text_fb.GetBestSize())        
         ivfbbtn = wx.Button(panel2, 104, "Interviewer Feedback")
         self.Bind(wx.EVT_BUTTON, self.OnLineGraph, ivfbbtn)
-        fbvaluesbtn = wx.Button(panel2, 105, "Feedback on Booking.com Values")
-        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbvaluesbtn)
-
+        stagefbbtn = wx.Button(panel2, 108, "Feedback interview stages") 
+        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, stagefbbtn)
         fbqualitybtn = wx.Button(panel2, 106, "Feedback Quality")
         self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbqualitybtn)
         fbreceivedbtn = wx.Button(panel2, 401, "Feedback recieved?")
         self.Bind(wx.EVT_BUTTON, self.OnPieChart, fbreceivedbtn)
 
+        text_fbv = wx.StaticText(panel2, 13, "Feedback on Booking.com") 
+        text_fbv.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+        text_fbv.SetSize(text_fb.GetBestSize()) 
+        fbvaluesbtn = wx.Button(panel2, 105, "Feedback on Booking.com Values")
+        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbvaluesbtn)
+        rblogbtn = wx.Button(panel2, 403, "Read the Tech Blog?")
+        self.Bind(wx.EVT_BUTTON, self.OnPieChart, rblogbtn)
+        fbblogbtn = wx.Button(panel2, 107, "Feedback on Tech Blog")
+        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbblogbtn)
+
         #standalone graphs new categories
-        text_other = wx.StaticText(panel2, 14, "Standalone graphs \n(more graphs to be added)") #need to make per role as well
+        text_other = wx.StaticText(panel2, 14, "Other") #need to make per role as well
         text_other.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_other.SetSize(text_other.GetBestSize())
-        statusbtn = wx.Button(panel2, 402, "Distribution Rejected, Offered & Hired")
+        statusbtn = wx.Button(panel2, 402, "Distribution Rejected, Offered and Hired")
         self.Bind(wx.EVT_BUTTON, self.OnPieChart, statusbtn)
 
         # Use a sizer to layout the controls, stacked vertically and with
@@ -499,9 +592,14 @@ class MyFrame(wx.Frame):
         
         sizer2.Add(text_fb, 0, wx.ALL, 10)
         sizer2.Add(ivfbbtn, 0, wx.ALL, 10)
-        sizer2.Add(fbvaluesbtn, 0, wx.ALL, 10)
+        sizer2.Add(stagefbbtn, 0, wx.ALL, 10)
         sizer2.Add(fbqualitybtn, 0, wx.ALL, 10)
-        sizer2.Add(fbreceivedbtn, 0, wx.ALL, 10)    
+        sizer2.Add(fbreceivedbtn, 0, wx.ALL, 10)  
+
+        sizer2.Add(text_fbv, 0, wx.ALL, 10)
+        sizer2.Add(fbvaluesbtn, 0, wx.ALL, 10) 
+        sizer2.Add(rblogbtn, 0, wx.ALL, 10)
+        sizer2.Add(fbblogbtn, 0, wx.ALL, 10) 
 
         sizer2.Add(text_other, 0, wx.ALL, 10)
         sizer2.Add(statusbtn, 0, wx.ALL, 10)
