@@ -4,11 +4,13 @@ import json
 import datetime
 import customeyes_plots
 import pprint
+import re
 
 role_prefix_blacklist = ["Accommodation Service Executive", "Commercial Owner", "Customer Service Executive", "Graduate Commercial Owner", 
     "Operations Analyst - Translations and Content Agency", "Operations Coordinator - Freelance Recruitment", "Partner Marketing (CRM) (Marketing Database Specialist)",
     "Process Specialist Inbound", "Recruiter - Headquarters", "Seasonal Customer Relations Associate *Internal*", "Sourcer - Global Leadership", 
-    "Sr. Specialist Partner Marketing & Partner Activations", "Topic Specialist - Operations *Internal*", "Customer Service Business"]
+    "Sr. Specialist Partner Marketing & Partner Activations", "Topic Specialist - Operations *Internal*", "Customer Service Business", "Jr. Commercial Owner", 
+    "Sr. Internal Communications Specialist","Global Implementation Specialist - Operational Excellence"]
 
 role_title_map = {
     "Back End Developers (Referrals only)":             "Back End Developer", 
@@ -38,7 +40,7 @@ role_title_map = {
     "Referral Product Owner E-commerce":                "Product Owner E-commerce",
     "Sr. Devops Engineer (Monitoring - ITS)":           "Sr. Devops Engineer",
     "Sr. Software Engineer":                            "Sr. Software Developer",
-    "Systems Engineer (Platform - ITS)":                "Systems Engineer - Platform",
+    "Systems Engineer (Platform - ITS)":                "Systems Engineer",
     "UX Designer (Headhunts only)":                     "UX Designer",
     "UX Designer - Headhunts only":                     "UX Designer",
     "Wireless Network Engineer (NetOffices - ITS)":     "Wireless Network Engineer",
@@ -56,17 +58,29 @@ role_title_map = {
     "HACK WITH PRIDE":                                  "Event - Hackathon - Hack With Pride",
     "Hack a Holiday - Manila Edition":                  "Event - Hackathon - Manila",
     "Product Owner (Women in Tech)":                    "Event - Women in Tech - Product Owner",
+    "B2B Copywriter":                                   "Copywriter - B2B",
+    "Software Developer & Team Lead":                   "Team Lead - Software Development",
+    "Sr. Data Scientist Online Advertising":            "Sr. Data Scientist - Online Advertising",
+    "IT Support Desk Team Lead":                        "Team Lead IT Support Desk",
 }
 
 role_groups = [
     {"group_title": "Product Owner", "pattern": re.compile(r"^Product Owner")},
-    {"group_title": "Event", "pattern": re.compile(r"^Event -")}
-    {"group_title": "Designer", "pattern": re.compile(r"(^Designer|Designer$)")}
-
-
+    {"group_title": "Event", "pattern": re.compile(r"^Event -")},
+    {"group_title": "Graduates", "pattern": re.compile(r"^Graduate")},
+    {"group_title": "Designer", "pattern": re.compile(r"^Designer.*$|^(?!Sr\.|Graduate).*Designer$")},
+    {"group_title": "Mobile Developer", "pattern": re.compile(r"^(Android|iOS) Developer")},
+    {"group_title": "Copywriter", "pattern": re.compile(r"^Copywriter -")}, 
+    {"group_title": "Cyber Security", "pattern": re.compile(r"^Cyber Security")},
+    {"group_title": "Data Analyst", "pattern": re.compile(r"^Data Analyst -")},
+    {"group_title": "Data Scientist", "pattern": re.compile(r"^Data Scientist -")},
+    {"group_title": "Sr. Mobile Developer", "pattern": re.compile(r"^(Sr\. Android|Sr\. iOS) Developer")},
+    {"group_title": "Sr. Data Scientist", "pattern": re.compile(r"^Sr\. Data Scientist -")},
+    {"group_title": "Sr. Product Owner", "pattern": re.compile(r"^Sr\. Product Owner")},
+    {"group_title": "Recruiter", "pattern": re.compile(r".*Recruiter.*")}, 
+    {"group_title": "Sr. Designer", "pattern": re.compile(r"^Sr\..*Designer$")},
+    {"group_title": "Site Reliability Engineer", "pattern": re.compile(r"^(Site Reliability Engineer|MySQL Database Engineer)")},
 ]
-
-
 
 #loading data from Excel
 def load_data():
