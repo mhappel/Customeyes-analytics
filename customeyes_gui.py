@@ -8,6 +8,7 @@ import datetime
 import customeyes
 import customeyes_plots
 import wx
+import wx.dataview
 
 
 category_info = {
@@ -132,6 +133,60 @@ category_info = {
 #    "\"Did you have online assessments?\"", "\"Overall, I am satisfied with the offer I recieved\"",
 #    "\"To what extend where you satisfied with the salary and benefits?\"", "\"It is clear what tasks belong to the job I accepted\"", 
 #    "\"The job offer letter was clear to me\"", "\"I recommend Booking.com as an Employer to others\"", "\"I recommend others to book accomodations at Booking.com\""
+
+class TestPanel(wx.Frame):
+    def __init__(self, parent, log):
+        self.log = log
+        wx.Frame.__init__(self, parent, -1)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+
+        button_id = 101
+        self.category = button_id/100
+
+        if button_id > 200: 
+            self.tree = wx.dataview.TreeListCtrl(self, -1, style = wx.TR_DEFAULT_STYLE)       
+            #self.rolelb = wx.CheckListBox(self.panel, -1, (15,140), (450,150), self.roles)
+            #self.Bind(wx.EVT_CHECKLISTBOX, self.on_role_select, self.rolelb)
+            #self.rolelb.SetCheckedItems([0])
+        else:
+            self.tree = wx.dataview.TreeListCtrl(self, -1, style = wx.TR_HAS_BUTTONS) 
+            #self.rolelb = wx.ListBox(self.panel, -1, (15,140), (450,150), self.roles, wx.LB_SINGLE)
+            #self.Bind(wx.EVT_LISTBOX, self.on_parameter_change, self.rolelb)
+            #self.rolelb.SetSelection(0)  
+
+        # create some columns
+        self.tree.AppendColumn("Technology")
+        self.tree.SetColumnWidth(0, 175)
+
+        if category_info[self.category].get("show_all", False):
+            self.roles = ["All"] + app.roles
+        else:
+            self.roles = app.roles
+
+        for role in self.roles:
+            self.root = self.tree.InsertItem(self.tree.GetRootItem(), wx.dataview.TLI_LAST, role)
+
+            for x in range(5):
+                txt = "Role2 %d" % x
+                child = self.tree.AppendItem(self.root, txt)
+
+        self.tree.Expand(self.root)
+
+        self.tree.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnActivate)
+
+
+    def OnActivate(self, event):
+        self.log.write('OnActivate: %s' % self.tree.GetItemText(event.GetItem()))
+
+    def OnRightUp(self, event):
+        pos = event.GetPosition()
+        item, flags, col = self.tree.HitTest(pos)
+        if item:
+            self.log.write('Flags: %s, Col:%s, Text: %s' %
+                           (flags, col, self.tree.GetItemText(item, col)))
+
+    def OnSize(self, event):
+        self.tree.SetSize(self.GetSize())
 
 
 #Popup window for parameters (and graph)
@@ -533,7 +588,14 @@ class MyFrame(wx.Frame):
         fastiv2btn = wx.Button(panel1, 203, "Compare roles")
         self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, fastiv2btn)
         barfstbtn = wx.Button(panel1, 303, "Correlate by role")
-        self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barfstbtn) 
+        self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barfstbtn)
+
+        #some testing buttons
+        text_test = wx.StaticText(panel1, -1, "Test buttons") 
+        text_test.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+        text_test.SetSize(text_fast.GetBestSize())
+        treetestbtn = wx.Button(panel1, 103, "Tree test")
+        self.Bind(wx.EVT_BUTTON, self.OnTreeTest, treetestbtn)
 
         #Feedback analytics
         text_fb = wx.StaticText(panel2, 13, "Feedback on Interviews") 
@@ -584,7 +646,10 @@ class MyFrame(wx.Frame):
         sizer1.Add(text_fast, 0, wx.ALL, 10)
         sizer1.Add(fastivbtn, 0, wx.ALL, 10)
         sizer1.Add(fastiv2btn,0,wx.ALL,10)        
-        sizer1.Add(barfstbtn, 0, wx.ALL, 10)  
+        sizer1.Add(barfstbtn, 0, wx.ALL, 10) 
+
+        sizer1.Add(text_test, 0, wx.ALL, 10)
+        sizer1.Add(treetestbtn, 0, wx.ALL, 10) 
 
         panel1.SetSizer(sizer1)
         panel1.Layout()
@@ -644,6 +709,10 @@ class MyFrame(wx.Frame):
         data = customeyes.load_data_json()
         customeyes.completion_status(data)
         customeyes_plots.plt.show() 
+
+    def OnTreeTest (self, log):
+        win = TestPanel(self, log)
+        win.Show(True)
 
     def OnTimeToClose(self, evt):
         """Event handler for the button click."""

@@ -36,11 +36,18 @@ role_title_map = {
     "Network Tools and Automation Engineer (NetOffices - ITS)": "Network Tools Developer - IT Services",
     "Product Owner E-commerce (Referrals only)":        "Product Owner E-commerce",
     "Referral Product Owner E-commerce":                "Product Owner E-commerce",
+    "Product Owner - People Development":               "Product Owner People Development",
+    "Product Owner - New Product Development":          "Product Owner New Product Development",
+    "Product Owner - Localization (Japan)":             "Product Owner Localization (Japan)",
+    "Product Owner - Authorization & Authentication":   "Product Owner Authorization & Authentication",
+    "Network Security Product Owner":                   "Product Owner Network Security",
+    "Network Tech Product Owner":                       "Product Owner Network Technology",
     "Sr. Devops Engineer (Monitoring - ITS)":           "Sr. Devops Engineer",
     "Sr. Software Engineer":                            "Sr. Software Developer",
     "Systems Engineer (Platform - ITS)":                "Systems Engineer - Platform",
     "UX Designer (Headhunts only)":                     "UX Designer",
     "UX Designer - Headhunts only":                     "UX Designer",
+    "Mobile App Designer":                              "Designer Mobile App",
     "Wireless Network Engineer (NetOffices - ITS)":     "Wireless Network Engineer",
     "(Event - Women in Tech) UX Designer":              "Event - Women in Tech - UX Designer",
     "(Event) Assessment Days Mexico City":              "Event - Assessment Day - Mexico City",
@@ -56,7 +63,10 @@ role_title_map = {
     "HACK WITH PRIDE":                                  "Event - Hackathon - Hack With Pride",
     "Hack a Holiday - Manila Edition":                  "Event - Hackathon - Manila",
     "Product Owner (Women in Tech)":                    "Event - Women in Tech - Product Owner",
-}
+    "E-commerce Copywriter":                            "Copywriter - E-commerce",
+    "Employer Brand Copywriter":                        "Copywriter - Employer Brand",
+    "UX Copywriter":                                    "Copywriter - UX",
+    }
 
 #loading data from Excel
 def load_data():
@@ -189,7 +199,6 @@ def line_month_averages(data, date_column_name, score_column_name, stats = None,
         if series_name not in stats[month]:
             stats[month][series_name] = None
     
-    pprint.pprint(stats)
     return stats
  
 def draw_lineplot(stats, date_column_name, score_column_name, title):
