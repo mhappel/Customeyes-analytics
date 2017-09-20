@@ -256,20 +256,6 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
 
         self.create_date_select(70)
 
-        if category_info[self.category].get("show_all", False):
-            self.roles = ["All"] + app.roles
-        else:
-            self.roles = app.roles
-
-   #     if self.button_id > 200 or len(category_info[self.category]["series"][self.series_idx]) == 1:        
-   #         self.rolelb = wx.CheckListBox(self.panel, -1, (15,140), (450,150), self.roles)
-   #         self.Bind(wx.EVT_CHECKLISTBOX, self.on_role_select, self.rolelb)
-   #         #self.rolelb.SetCheckedItems([0])
-   #     else:
-   #         self.rolelb = wx.ListBox(self.panel, -1, (15,140), (450,150), self.roles, wx.LB_SINGLE)
-   #         self.Bind(wx.EVT_LISTBOX, self.on_parameter_change, self.rolelb)
-   #         self.rolelb.SetSelection(0)
-
         if self.button_id > 200 or len(category_info[self.category]["series"][self.series_idx]) == 1: 
             self.tree = wx.dataview.TreeListCtrl(self.panel, -1, (15,140), (450,150), style = wx.TR_DEFAULT_STYLE)       
         else:
@@ -278,20 +264,21 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
         # create some columns
         self.tree.AppendColumn("Technology")
         self.tree.SetColumnWidth(0, 420)
+        self.roles = app.roles
 
         if category_info[self.category].get("show_all", False):
-            self.roles = ["All"] + app.roles
+            self.root = self.tree.InsertItem(self.tree.GetRootItem(), wx.dataview.TLI_FIRST, "All")
         else:
-            self.roles = app.roles
-
+            self.root = self.tree.GetRootItem()
+        
         for role in self.roles:
-            self.root = self.tree.InsertItem(self.tree.GetRootItem(), wx.dataview.TLI_LAST, role)
-
+            branch = self.tree.AppendItem(self.root, role)
             for x in range(5):
                 txt = "Role2 %d" % x
-                child = self.tree.AppendItem(self.root, txt)
-
+                role = self.tree.AppendItem(branch, txt)
+            self.tree.Expand(branch)
         self.tree.Expand(self.root)
+
         self.tree.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnActivate)
         
         if self.button_id > 200:

@@ -58,6 +58,16 @@ role_title_map = {
     "Product Owner (Women in Tech)":                    "Event - Women in Tech - Product Owner",
 }
 
+role_groups = [
+    {"group_title": "Product Owner", "pattern": re.compile(r"^Product Owner")},
+    {"group_title": "Event", "pattern": re.compile(r"^Event -")}
+    {"group_title": "Designer", "pattern": re.compile(r"(^Designer|Designer$)")}
+
+
+]
+
+
+
 #loading data from Excel
 def load_data():
     wb = open_workbook("report.xlsx")
