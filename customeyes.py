@@ -301,7 +301,7 @@ def draw_barplot(stats, score_column_name, title):
     else:
         ylabels = ("Strongly Disagree", "Strongly Agree")
     
-    customeyes_plots.barplot(stats, "{:}".format(title), ylabel = "From {:} (0) to {:} (10)".format(*ylabels), bar_width = 0.75, sort_key = lambda (k,(v,c)): -v) #TO DO: Change the generation of title
+    customeyes_plots.barplot(stats, "{:}".format(title), ylabel = "From {:} (0) to {:} (10)".format(*ylabels), bar_width = 0.75, sort_key = lambda (k,(v,c)): -v)
 
 
 #Pie charts per role
@@ -340,101 +340,44 @@ def draw_pieplot(stats, title):
     customeyes_plots.pieplot(stats, title)
 
 
-
-
 #Histogram scores overall recruitment process
 #TO DO: make it per role
-def month_score_dist(data):    
-    stats = {
-        (0.0,"Strongly disagree"):0,
-        (2.5,"Disagree"):0,
-        (5.0,"Neither agree nor disagree"):0,
-        (7.5,"Agree"):0,
-        (10.0,"Strongly agree"):0
-        }
+def histo_score_dist(data, score_column_name = None, stats = None, start_date = None, end_date = None, roles = "Requisition_Title", series_name = None, role_title = None):       
+    if stats is None:
+        stats = dict()
+    
     count = 0
-    score_column_name = "Recruitment process"
+
+    if start_date is None:
+        start_date = datetime.date(2016,11,1)
+
+    if series_name is None:
+        series_name = role_title or "All Roles"
+        
     for d in data:
+        if role_title is not None and d[roles] != role_title:
+            continue
+        
+        month = dates_setting(d,"Application Date")
+        if month is None or month < start_date or (end_date is not None and month > end_date): 
+            continue    
+ 
         if score_column_name in d:
-            try:
-                v = d[score_column_name].split("-", 1)    
-                if len(v) == 2:
-                    v = (float(v[0].strip()), v[1].strip())
-                    stats[v] += 1
-                    count += 1
-            except KeyError:
-                pass
-    for keys,occ in sorted(stats.items()):
-        stats[keys] = (float(occ)/count)*100
-    customeyes_plots.histoplot(stats, "Distribution scores \"Recruitment Process\"",ylabel="%",data_label=lambda k: k[1])
+            key = d[score_column_name].replace(u"\u2019", "'")
+            if score_column_name != "Degree difficulty interviews":
+                key = key.split("-", 1)[-1].strip()
+            if key not in stats:
+                stats[key] = 0
+            stats[key] += 1
+            count += 1
 
+    for keys,occ in stats.items():
+        stats[keys] = ((float(occ)/count)*100, occ)
 
-
-
-
-
-
-
-#satisfaction of interview by interview stage - in progress
-def hv_av_scores_interview_stage(data):    
-    stats = dict()
-    stages = [
-        "Satisfaction online assessments",
-        "Technical phone interview satisfaction",
-        "Recruiter phone interview satisfaction",
-        "Satisfaction face to face interviews",
-    ]
-    for d in data:
-        if "Requisition_Title" not in stats:
-            stats["Requisition_Title"] = dict()
-            for stage in stages:
-                stats["Requisition_Title"][stage] = list()
-        for stage in stages:
-            if stage in d:
-                try:
-                    v = float(d[stage].split("-", 1)[0].strip())
-                    stats["Requisition_Title"][stage].append(v)
-                except: pass
-    for Requisition_Title,stages_stats in stats.items():
-        for stage,scores in stages_stats.items():
-            if len(scores)>10:
-                stats[Requisition_Title][stage] = sum(scores)/len(scores)
-            else:
-                del stats[Requisition_Title][stage]
-    
-    customeyes_plots.hbarplot(stats, "Average scores per stage per role (High Volume)", 
-        xlabel = "Average Score", sort_key = lambda (k,v): v, left = 0, right = 10)      
-    
-#satisfaction of interview by interview stage  RETHINK GRAPH, NOT WORKING  
-def hv_av_scores_interview_stage(data):    
-    stats = dict()
-    role = "Requisition_Title"
-    stages = [
-        "Satisfaction online assessments",
-        "Technical phone interview satisfaction",
-        "Recruiter phone interview satisfaction",
-        "Satisfaction face to face interviews",
-    ]
-    for d in data:
-        if role not in stats:
-            stats[role] = dict()
-            for stage in stages:
-                stats[role][stage] = list()
-        for stage in stages:
-            if stage in d:
-                try:
-                    v = float(d[stage].split("-", 1)[0].strip())
-                    stats[role][stage].append(v)
-                except: pass
-    for Requisition_Title,stages_stats in stats.items():
-        for stage,scores in stages_stats.items():
-            if len(scores)>10:
-                stats[Requisition_Title][stage] = sum(scores)/len(scores)
-            else:
-                del stats[Requisition_Title][stage]
-    
-    customeyes_plots.hbarplot(stats, "Average scores per stage per role (High Volume)", 
-        xlabel = "Average Score", sort_key = lambda (k,v): v, left = 0, right = 10)  
+    return stats, count    
+  
+def draw_histoplot(stats, title, order):
+    customeyes_plots.histoplot(stats, title, ylabel = "%", sort_key = lambda k:order[k[0]])
 
  
 def main():
@@ -442,28 +385,6 @@ def main():
     #data = load_data_json()
     dump_data(data)
     
-    #stats = dict()
-    #line_month_averages(data, "Application Date", "Recruitment process", stats = stats)
-    #line_month_averages(data, "Application Date", "Recruitment process", stats = stats, role_title = "Software Developer")
-    #draw_lineplot(stats, "Application Date", "Recruitment process")
-    
-    #stats = interviewers(data, "Application Date")
-    #draw_lineplot(stats, "Application Date", "Feedback on Interviewers")
-    
-    #stats = booking_values(data)
-    #draw_lineplot(stats, "Application Date", "Broken shit")
-    
-    #stage_satisfaction(data)
-    #iv_stage_satisfaction_rej_date(data)    
-    #source_overall_scores(data)
-    #month_score_dist(data)
-    #feedback_recieved(data)
-    #completion_status(data)
-    #hv_av_scores_interview_stage(data)
-        
-    #with plt.xkcd():
-
-    #customeyes_plots.plt.show()
    
 if __name__ == "__main__":
     main()

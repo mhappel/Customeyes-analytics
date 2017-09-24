@@ -131,6 +131,15 @@ category_info = {
             "\"Did you read the technical blog?\"",
             ],
     },
+    5: {
+        "series":
+            ["Recruitment process","Degree difficulty interviews", "Fast application process"],
+        "questions": [
+            "\"Overall, I am satisfied with the recruitment process\"",
+            "\"Could you describe the degree of difficulty of the interviews?\"", 
+            "\"I have the feeling that Booking.com acts fast\"",
+            ],
+    },
 }
 
 # questions answered:
@@ -517,9 +526,9 @@ class Pie_ChartWindow(Base_GraphWindow):
         
         title = question
         if role_idx == 0:
-            title = "{:}\n{:} ({:} records)".format(question, "All Roles", count)
+            title = "{:}\n{:} ({:} record(s))".format(question, "All Roles", count)
         else:
-            title = "{:}\n{:} ({:} records)".format(question, role_title, count)
+            title = "{:}\n{:} ({:} record(s))".format(question, role_title, count)
 
         has_data = False
         
@@ -530,6 +539,84 @@ class Pie_ChartWindow(Base_GraphWindow):
             dlg = wx.MessageDialog(self, "No data available", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
             dlg.ShowModal()
             dlg.Destroy()    
+
+class Histo_Window(Base_GraphWindow):
+
+    def __init__(self, parent, ID, title, button_id, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE):
+        super(Histo_Window, self).__init__(parent, ID, title, button_id, pos, size, style)
+
+        self.create_date_select(35) 
+      
+        self.roles = ["All"] + app.roles
+
+        self.rolelb = wx.ListBox(self.panel, -1, (15,105), (450,150), self.roles, wx.LB_SINGLE)
+        self.Bind(wx.EVT_LISTBOX, self.on_parameter_change, self.rolelb)
+        self.rolelb.SetSelection(0)
+        
+        publishbtn = wx.Button(self.panel, -1, "Show Chart", (15,320))
+        self.Bind(wx.EVT_BUTTON, self.On_publish_histogram, publishbtn)
+
+    def On_publish_histogram(self, event):
+            
+        date_column_name = "Application Date"
+        
+        start_year = int(self.startyearch.GetStringSelection())
+        start_month = self.startmonthch.GetSelection() + 1
+        start_date = datetime.date(start_year, start_month, 1)
+
+        end_year = int(self.endyearch.GetStringSelection())
+        end_month = self.endmonthch.GetSelection() + 1
+        end_date = datetime.date(end_year, end_month, 1) 
+  
+        if start_date > end_date:
+            dlg = wx.MessageDialog(self, "Cannot select End Date before Start Date.", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
+            dlg.ShowModal()
+            dlg.Destroy()
+            return
+ 
+        role_idx = self.rolelb.GetSelection()
+        if role_idx == 0:
+            role_title = None
+        else:
+            role_title = app.roles[role_idx -1]
+
+        score_column_name = category_info[self.category]["series"][self.series_idx]
+        stats, count = customeyes.histo_score_dist(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_title = role_title)
+        question = category_info[self.category]["questions"][self.series_idx]
+        
+        title = question
+        if role_idx == 0:
+            title = "{:}\n{:}".format(question, "All Roles")
+        else:
+            title = "{:}\n{:}".format(question, role_title)
+
+        has_data = False
+        
+        if len(stats) > 0:
+            if score_column_name == "Degree difficulty interviews":
+                order = {
+                    "Very easy": 0.0,
+                    "Easy": 2.5,
+                    "Average": 5.0,
+                    "Difficult": 7.5,
+                    "Very difficult": 10.0,
+                }
+            else:
+                order = {
+                    "Strongly disagree": 0.0,
+                    "Disagree": 2.5,
+                    "Neither agree nor disagree":5.0,
+                    "Agree": 7.5,
+                    "Strongly agree": 10.0,
+                    "Don't know/ no experience": 11.0,
+                }
+            customeyes.draw_histoplot(stats, title, order)
+            customeyes_plots.plt.show() 
+        else:
+            dlg = wx.MessageDialog(self, "No data available", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
+            dlg.ShowModal()
+            dlg.Destroy() 
+
 
 
 class MyFrame(wx.Frame):
@@ -574,7 +661,7 @@ class MyFrame(wx.Frame):
         barprocbtn = wx.Button(panel1, 301, "Correlate by role")
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barprocbtn)
         scoredistbtn = wx.Button(panel1, 501, "Distribution of scores")
-        self.Bind(wx.EVT_BUTTON, self.month_score_dist, scoredistbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnHistogram, scoredistbtn)
 
         #Difficulty interviews analytics
         text_diff = wx.StaticText(panel1, -1, "Degree of difficulty of interviews") 
@@ -586,6 +673,8 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, ivdif2btn)
         bardifbtn = wx.Button(panel1, 302, "Correlate by role")
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, bardifbtn)
+        difdistbtn = wx.Button(panel1, 502, "Distribution of scores")
+        self.Bind(wx.EVT_BUTTON, self.OnHistogram, difdistbtn)
 
         #Speed interviews analytics
         text_fast = wx.StaticText(panel1, -1, "Perception speed application process") 
@@ -597,6 +686,8 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnHbarGraph, fastiv2btn)
         barfstbtn = wx.Button(panel1, 303, "Correlate by role")
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barfstbtn)
+        speeddistbtn = wx.Button(panel1, 503, "Distribution of scores")
+        self.Bind(wx.EVT_BUTTON, self.OnHistogram, speeddistbtn)
 
         #some testing buttons
         #text_test = wx.StaticText(panel1, -1, "Test buttons") 
@@ -637,7 +728,6 @@ class MyFrame(wx.Frame):
         fbofferbtn = wx.Button(panel2, 109, "Satisfaction Offer")
         self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbofferbtn)
 
-
         #standalone graphs new categories
         text_other = wx.StaticText(panel2, 14, "Other") #need to make per role as well
         text_other.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
@@ -659,11 +749,13 @@ class MyFrame(wx.Frame):
         sizer1.Add(ivdifbtn, 0, wx.ALL, 10)
         sizer1.Add(ivdif2btn, 0, wx.ALL, 10)      
         sizer1.Add(bardifbtn, 0, wx.ALL, 10) 
+        sizer1.Add(difdistbtn, 0, wx.ALL, 10)
 
         sizer1.Add(text_fast, 0, wx.ALL, 10)
         sizer1.Add(fastivbtn, 0, wx.ALL, 10)
         sizer1.Add(fastiv2btn,0,wx.ALL,10)        
         sizer1.Add(barfstbtn, 0, wx.ALL, 10) 
+        sizer1.Add(speeddistbtn, 0, wx.ALL, 10)
 
         #sizer1.Add(text_test, 0, wx.ALL, 10)
         #sizer1.Add(treetestbtn, 0, wx.ALL, 10) 
@@ -715,20 +807,16 @@ class MyFrame(wx.Frame):
         win = Pie_ChartWindow(self, -1, evt.GetEventObject().GetLabel(), evt.GetId(), size=(500, 400), style = wx.DEFAULT_FRAME_STYLE)
         win.Show(True)
 
+    def OnHistogram (self, evt):
+        win = Histo_Window(self, -1, evt.GetEventObject().GetLabel(), evt.GetId(), size=(500, 400), style = wx.DEFAULT_FRAME_STYLE)
+        win.Show(True)
+
     def month_score_dist(self, evt):
         data = customeyes.load_data_json()
         customeyes.month_score_dist(data)
         customeyes_plots.plt.show() 
 
-    def feedback_recieved(self, evt):
-        data = customeyes.load_data_json()
-        customeyes.pie_chart_calc(data)
-        customeyes_plots.plt.show() 
-
-    def completion_status(self, evt):
-        data = customeyes.load_data_json()
-        customeyes.completion_status(data)
-        customeyes_plots.plt.show() 
+ 
 
 #    def OnTreeTest (self, log):
 #        win = TestPanel(self, log)
