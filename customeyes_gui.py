@@ -44,6 +44,13 @@ category_info = {
                 "Technical phone interview satisfaction",
                 "Satisfaction face to face interviews",
             ],
+            [   "Offer accepted (OA): Satisfaction offer",
+                "Offer accepted: Satisfaction salary and benefits",
+                "Offer accepted: Clarity job letter",
+                "Offer declined(OD): Satisfaction offer",
+                "Offer declined: Satisfaction salary and benefits",
+                "Offer declined: Clarity job letter",
+            ],
         ],
         "labels": [
             ["Overall recruitment process"],
@@ -75,6 +82,13 @@ category_info = {
                 "Technical phone interview",
                 "Face to face interviews",
             ],
+            [   "Offer accepted: Overall, I'm satisfied with the offer I received",
+                "Offer accepted: To what extent where you satisfied with the salary and benefits?",
+                "Offer accepted: The offer letter was clear to me",
+                "Offer declined: Overall, I'm satisfied with the offer I received",
+                "Offer declined: To what extent where you satisfied with the salary and benefits?",
+                "Offer declined: The offer letter was clear to me",
+            ],
         ],
         "questions": [
             "\"Overall, I am satisfied with the recruitment process\"",
@@ -85,6 +99,7 @@ category_info = {
             "Feedback Quality",
             "Feedback on Booking.com Tech Blog",
             "\"Overal, I am satisfied with the interview(s) I had\"",
+            "Feedback on Offers",
         ],
     },
     2: {
@@ -123,16 +138,16 @@ category_info = {
 #    "\"Could you describe the degree of difficulty of the interviews?\"", "\"I recieved feedback after/during my application\"", 
 #    "\"Overall, I'm satisfied with the feedback I recieved\"", "\"I have the feeling that Booking.com acts fast\""]
 #    "\"Did you read the technical blog?\"", "\"I found the content of the blog helpful in my preparation\"", 
-#    "\"I thought the blog gave me good insight in the technical challenges I would face\"", 
+#    "\"I thought the blog gave me good insight in the technical challenges I would face\"", "\"Overall, I am satisfied with the offer I recieved\"",
+#    "\"To what extend where you satisfied with the salary and benefits?\"" 
+#    "\"The job offer letter was clear to me\"",
 
 # questions to be answered:
 #    "\"Overal, I am satisfied with the interview(s) I had\"" => Made a graph per stage, but there is no column with this actual data.
     
 # questions not yet answered in graphs: 
 #    "\"It was clear to me what I could expect from the application procedure\"", "\"How many rounds of interviews have you had in total?\"", 
-#    "\"Did you have online assessments?\"", "\"Overall, I am satisfied with the offer I recieved\"",
-#    "\"To what extend where you satisfied with the salary and benefits?\"", "\"It is clear what tasks belong to the job I accepted\"", 
-#    "\"The job offer letter was clear to me\"", "\"I recommend Booking.com as an Employer to others\"", "\"I recommend others to book accomodations at Booking.com\""
+#    "\"Did you have online assessments?\"",  "\"I recommend Booking.com as an Employer to others\"", "\"I recommend others to book accomodations at Booking.com\""
 
 class TestPanel(wx.Frame):
     def __init__(self, parent, log):
@@ -145,14 +160,8 @@ class TestPanel(wx.Frame):
 
         if button_id > 200: 
             self.tree = wx.dataview.TreeListCtrl(self, -1, style = wx.TR_DEFAULT_STYLE)       
-            #self.rolelb = wx.CheckListBox(self.panel, -1, (15,140), (450,150), self.roles)
-            #self.Bind(wx.EVT_CHECKLISTBOX, self.on_role_select, self.rolelb)
-            #self.rolelb.SetCheckedItems([0])
         else:
             self.tree = wx.dataview.TreeListCtrl(self, -1, style = wx.TR_HAS_BUTTONS) 
-            #self.rolelb = wx.ListBox(self.panel, -1, (15,140), (450,150), self.roles, wx.LB_SINGLE)
-            #self.Bind(wx.EVT_LISTBOX, self.on_parameter_change, self.rolelb)
-            #self.rolelb.SetSelection(0)  
 
         # create some columns
         self.tree.AppendColumn("Technology")
@@ -554,7 +563,6 @@ class MyFrame(wx.Frame):
         panel1 = wx.Panel(self)
         panel2 = wx.Panel(self)
 
-
         #Overal recruitment process scores analytics
         text_process = wx.StaticText(panel1, -1, "Overall satisfaction recruitment process") 
         text_process.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
@@ -591,11 +599,11 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnBarGraph, barfstbtn)
 
         #some testing buttons
-        text_test = wx.StaticText(panel1, -1, "Test buttons") 
-        text_test.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-        text_test.SetSize(text_fast.GetBestSize())
-        treetestbtn = wx.Button(panel1, 103, "Tree test")
-        self.Bind(wx.EVT_BUTTON, self.OnTreeTest, treetestbtn)
+        #text_test = wx.StaticText(panel1, -1, "Test buttons") 
+        #text_test.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+        #text_test.SetSize(text_fast.GetBestSize())
+        #treetestbtn = wx.Button(panel1, 103, "Tree test")
+        #self.Bind(wx.EVT_BUTTON, self.OnTreeTest, treetestbtn)
 
         #Feedback analytics
         text_fb = wx.StaticText(panel2, 13, "Feedback on Interviews") 
@@ -620,12 +628,21 @@ class MyFrame(wx.Frame):
         fbblogbtn = wx.Button(panel2, 107, "Feedback on Tech Blog")
         self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbblogbtn)
 
+        #feedback on offers
+        text_fboffer = wx.StaticText(panel2, 13, "Feedback on Offers") 
+        text_fboffer.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+        text_fboffer.SetSize(text_fb.GetBestSize()) 
+        statusbtn = wx.Button(panel2, 402, "Distribution Rejected, Offered and Hired")
+        self.Bind(wx.EVT_BUTTON, self.OnPieChart, statusbtn)
+        fbofferbtn = wx.Button(panel2, 109, "Satisfaction Offer")
+        self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbofferbtn)
+
+
         #standalone graphs new categories
         text_other = wx.StaticText(panel2, 14, "Other") #need to make per role as well
         text_other.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
         text_other.SetSize(text_other.GetBestSize())
-        statusbtn = wx.Button(panel2, 402, "Distribution Rejected, Offered and Hired")
-        self.Bind(wx.EVT_BUTTON, self.OnPieChart, statusbtn)
+
 
         # Use a sizer to layout the controls, stacked vertically and with
         # a 10 pixel border around each. Order of buttons to be determined here
@@ -648,8 +665,8 @@ class MyFrame(wx.Frame):
         sizer1.Add(fastiv2btn,0,wx.ALL,10)        
         sizer1.Add(barfstbtn, 0, wx.ALL, 10) 
 
-        sizer1.Add(text_test, 0, wx.ALL, 10)
-        sizer1.Add(treetestbtn, 0, wx.ALL, 10) 
+        #sizer1.Add(text_test, 0, wx.ALL, 10)
+        #sizer1.Add(treetestbtn, 0, wx.ALL, 10) 
 
         panel1.SetSizer(sizer1)
         panel1.Layout()
@@ -666,8 +683,11 @@ class MyFrame(wx.Frame):
         sizer2.Add(rblogbtn, 0, wx.ALL, 10)
         sizer2.Add(fbblogbtn, 0, wx.ALL, 10) 
 
-        sizer2.Add(text_other, 0, wx.ALL, 10)
+        sizer2.Add(text_fboffer, 0, wx.ALL, 10)
         sizer2.Add(statusbtn, 0, wx.ALL, 10)
+        sizer2.Add(fbofferbtn, 0, wx.ALL, 10)
+
+        sizer2.Add(text_other, 0, wx.ALL, 10)
 
         panel2.SetSizer(sizer2)
         panel2.Layout()
@@ -710,9 +730,9 @@ class MyFrame(wx.Frame):
         customeyes.completion_status(data)
         customeyes_plots.plt.show() 
 
-    def OnTreeTest (self, log):
-        win = TestPanel(self, log)
-        win.Show(True)
+#    def OnTreeTest (self, log):
+#        win = TestPanel(self, log)
+#        win.Show(True)
 
     def OnTimeToClose(self, evt):
         """Event handler for the button click."""
