@@ -140,6 +140,14 @@ category_info = {
             "\"I have the feeling that Booking.com acts fast\"",
             ],
     },
+    6: {
+        "series":
+            ["Recommend as employer", "Recommend as customer"],
+        "questions": [
+            "\"I recommend Booking.com as an employer to others\"\nNPS score:",
+            "\"Taking your application process into account, I recommend others to book accomodations at Booking.com\"\nNPS score:",
+            ],
+    },
 }
 
 # questions answered:
@@ -156,7 +164,7 @@ category_info = {
     
 # questions not yet answered in graphs: 
 #    "\"It was clear to me what I could expect from the application procedure\"", "\"How many rounds of interviews have you had in total?\"", 
-#    "\"Did you have online assessments?\"",  "\"I recommend Booking.com as an Employer to others\"", "\"I recommend others to book accomodations at Booking.com\""
+#    "\"Did you have online assessments?\""
 
 class TestPanel(wx.Frame):
     def __init__(self, parent, log):
@@ -521,7 +529,10 @@ class Pie_ChartWindow(Base_GraphWindow):
             role_title = app.roles[role_idx -1]
 
         score_column_name = category_info[self.category]["series"][self.series_idx]
-        stats, count = customeyes.pie_chart_calc(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_title = role_title)
+        if self.category == 6:
+            stats, count = customeyes.NPS_score_calc(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_title = role_title)
+        else:
+            stats, count = customeyes.pie_chart_calc(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_title = role_title)
         question = category_info[self.category]["questions"][self.series_idx]
         
         title = question
@@ -532,6 +543,9 @@ class Pie_ChartWindow(Base_GraphWindow):
 
         has_data = False
         
+        if self.category == 6:
+            customeyes.draw_NPSplot(stats, title)
+            customeyes_plots.plt.show()            
         if len(stats) > 0:
             customeyes.draw_pieplot(stats, title)
             customeyes_plots.plt.show() 
@@ -581,9 +595,10 @@ class Histo_Window(Base_GraphWindow):
             role_title = app.roles[role_idx -1]
 
         score_column_name = category_info[self.category]["series"][self.series_idx]
-        stats, count = customeyes.histo_score_dist(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_title = role_title)
         question = category_info[self.category]["questions"][self.series_idx]
-        
+
+        stats, count = customeyes.histo_score_dist(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_title = role_title)
+             
         title = question
         if role_idx == 0:
             title = "{:}\n{:}".format(question, "All Roles")
@@ -728,10 +743,18 @@ class MyFrame(wx.Frame):
         fbofferbtn = wx.Button(panel2, 109, "Satisfaction Offer")
         self.Bind(wx.EVT_BUTTON, self.OnLineGraph, fbofferbtn)
 
+        text_nps = wx.StaticText(panel2, 14, "NPS") 
+        text_nps.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+        text_nps.SetSize(text_nps.GetBestSize())
+        npsemplbtn = wx.Button(panel2, 601, "Recommend as Employer")
+        self.Bind(wx.EVT_BUTTON, self.OnPieChart, npsemplbtn)
+        npscustbtn = wx.Button(panel2, 602, "Recommend as Customer")
+        self.Bind(wx.EVT_BUTTON, self.OnPieChart, npscustbtn)
+
         #standalone graphs new categories
-        text_other = wx.StaticText(panel2, 14, "Other") #need to make per role as well
+        text_other = wx.StaticText(panel2, 14, "Other") 
         text_other.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
-        text_other.SetSize(text_other.GetBestSize())
+        text_other.SetSize(text_other.GetBestSize())        
 
 
         # Use a sizer to layout the controls, stacked vertically and with
@@ -778,6 +801,10 @@ class MyFrame(wx.Frame):
         sizer2.Add(text_fboffer, 0, wx.ALL, 10)
         sizer2.Add(statusbtn, 0, wx.ALL, 10)
         sizer2.Add(fbofferbtn, 0, wx.ALL, 10)
+
+        sizer2.Add(text_nps, 0, wx.ALL, 10)
+        sizer2.Add(npsemplbtn, 0, wx.ALL, 10)
+        sizer2.Add(npscustbtn, 0, wx.ALL, 10)
 
         sizer2.Add(text_other, 0, wx.ALL, 10)
 

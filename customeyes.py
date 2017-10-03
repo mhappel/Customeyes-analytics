@@ -341,7 +341,6 @@ def draw_pieplot(stats, title):
 
 
 #Histogram scores overall recruitment process
-#TO DO: make it per role
 def histo_score_dist(data, score_column_name = None, stats = None, start_date = None, end_date = None, roles = "Requisition_Title", series_name = None, role_title = None):       
     if stats is None:
         stats = dict()
@@ -379,7 +378,45 @@ def histo_score_dist(data, score_column_name = None, stats = None, start_date = 
 def draw_histoplot(stats, title, order):
     customeyes_plots.histoplot(stats, title, ylabel = "%", sort_key = lambda k:order[k[0]])
 
- 
+def NPS_score_calc(data, score_column_name = None, stats = None, start_date = None, end_date = None, roles = "Requisition_Title", series_name = None, role_title = None):       
+    if stats is None:
+        stats = dict()
+    
+    count = 0
+
+    if start_date is None:
+        start_date = datetime.date(2016,11,1)
+
+    if series_name is None:
+        series_name = role_title or "All Roles"
+
+    for d in data:
+        if role_title is not None and d[roles] != role_title:
+            continue
+        if score_column_name not in d:
+            continue
+        score_label = (d[score_column_name].split("-", 1)[1].strip())
+        
+        month = dates_setting(d,"Application Date")
+        if month is None or month < start_date or (end_date is not None and month > end_date): 
+            continue    
+
+        if score_column_name in d:
+            key = score_label
+            if key not in stats:
+                stats[key] = 0
+            stats[key] += 1
+            count += 1
+
+    for keys,occ in stats.items():
+        stats[keys] = ((float(occ)/count)*100)
+
+    return stats, count   
+  
+def draw_NPSplot(stats, title):
+    customeyes_plots.pieplot(stats, title)
+
+
 def main():
     data = load_data()
     #data = load_data_json()
