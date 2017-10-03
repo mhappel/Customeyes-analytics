@@ -6,6 +6,8 @@ import customeyes_plots
 import pprint
 import re
 
+role_column_name = "Requisition_Title"
+
 role_prefix_blacklist = ["Accommodation Service Executive", "Commercial Owner", "Customer Service Executive", "Graduate Commercial Owner", 
     "Operations Analyst - Translations and Content Agency", "Operations Coordinator - Freelance Recruitment", "Partner Marketing (CRM) (Marketing Database Specialist)",
     "Process Specialist Inbound", "Recruiter - Headquarters", "Seasonal Customer Relations Associate *Internal*", "Sourcer - Global Leadership", 
@@ -181,32 +183,52 @@ def create_month_axes(start_date, end_date):
     return stats
  
 #single and multi line
-def line_month_averages(data, date_column_name, score_column_name, stats = None, series_name = None, roles = "Requisition_Title", role_title = None, start_date = None, end_date = None):   
+def line_month_averages(data, date_column_name, score_column_names, stats = None, series_names = None, role_title = None, selected_roles = None, start_date = None, end_date = None):   
     if stats is None:
         stats = dict()
     if start_date is None:
         start_date = datetime.date(2016,11,1)
-    if series_name is None:
-        series_name = role_title or "All Roles"
-    if score_column_name == "Degree difficulty interviews":
-        score_parser = score_converter
-    else:
-        score_parser = score_strip
-    
+
+    if selected_roles is not None:
+        series_names = set()
+        for target_names in selected_roles.values():
+            series_names.update(target_names)
+        score_column_names = [score_column_names[0]]*len(series_names)
+
     for d in data:
-        if role_title is not None and d[roles] != role_title:
-            continue
+        if selected_roles is not None:
+            if d[role_column_name] not in selected_roles:
+                continue
+        else:
+            if role_title is not None and d[role_column_name] != role_title:
+                continue
+        
         month = dates_setting(d,date_column_name)
 
         if month is None or month < start_date or (end_date is not None and month > end_date): 
             continue
         if month not in stats:
             stats[month] = dict()
-        if series_name not in stats[month]:
-            stats[month][series_name] = list()
-        score = score_parser(d,score_column_name)    
-        if score is not None:    
-            stats[month][series_name].append(score) 
+
+        for idx, series_name in enumerate(series_names):
+            if series_name not in stats[month]:
+                stats[month][series_name] = list()
+
+            score_column_name = score_column_names[idx]
+            if score_column_name == "Degree difficulty interviews":
+                score_parser = score_converter
+            else:
+                score_parser = score_strip
+
+            score = score_parser(d,score_column_name)    
+            if score is not None:    
+                if selected_roles is not None:
+                    if series_name not in selected_roles[d[role_column_name]]:
+                        continue
+
+
+                stats[month][series_name].append(score) 
+
     average_score_calc(stats)
     
     for month in stats.keys():
@@ -382,10 +404,6 @@ def month_score_dist(data):
     for keys,occ in sorted(stats.items()):
         stats[keys] = (float(occ)/count)*100
     customeyes_plots.histoplot(stats, "Distribution scores \"Recruitment Process\"",ylabel="%",data_label=lambda k: k[1])
-
-
-
-
 
 
 
