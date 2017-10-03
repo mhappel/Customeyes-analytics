@@ -411,10 +411,9 @@ def NPS_score_calc(data, score_column_name = None, stats = None, start_date = No
     for keys,occ in stats.items():
         stats[keys] = ((float(occ)/count)*100)
 
-    return stats, count   
-  
-def draw_NPSplot(stats, title):
-    customeyes_plots.pieplot(stats, title)
+    nps_score = int(stats["Promoter"] - stats["Criticaster"])
+
+    return stats, count, nps_score  
 
 
 def main():

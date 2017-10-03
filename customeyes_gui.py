@@ -166,54 +166,6 @@ category_info = {
 #    "\"It was clear to me what I could expect from the application procedure\"", "\"How many rounds of interviews have you had in total?\"", 
 #    "\"Did you have online assessments?\""
 
-class TestPanel(wx.Frame):
-    def __init__(self, parent, log):
-        self.log = log
-        wx.Frame.__init__(self, parent, -1)
-        self.Bind(wx.EVT_SIZE, self.OnSize)
-
-        button_id = 101
-        self.category = button_id/100
-
-        if button_id > 200: 
-            self.tree = wx.dataview.TreeListCtrl(self, -1, style = wx.TR_DEFAULT_STYLE)       
-        else:
-            self.tree = wx.dataview.TreeListCtrl(self, -1, style = wx.TR_HAS_BUTTONS) 
-
-        # create some columns
-        self.tree.AppendColumn("Technology")
-        self.tree.SetColumnWidth(0, 175)
-
-        if category_info[self.category].get("show_all", False):
-            self.roles = ["All"] + app.roles
-        else:
-            self.roles = app.roles
-
-        for role in self.roles:
-            self.root = self.tree.InsertItem(self.tree.GetRootItem(), wx.dataview.TLI_LAST, role)
-
-            for x in range(5):
-                txt = "Role2 %d" % x
-                child = self.tree.AppendItem(self.root, txt)
-
-        self.tree.Expand(self.root)
-
-        self.tree.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnActivate)
-
-
-    def OnActivate(self, event):
-        self.log.write('OnActivate: %s' % self.tree.GetItemText(event.GetItem()))
-
-    def OnRightUp(self, event):
-        pos = event.GetPosition()
-        item, flags, col = self.tree.HitTest(pos)
-        if item:
-            self.log.write('Flags: %s, Col:%s, Text: %s' %
-                           (flags, col, self.tree.GetItemText(item, col)))
-
-    def OnSize(self, event):
-        self.tree.SetSize(self.GetSize())
-
 
 #Popup window for parameters (and graph)
 class Base_GraphWindow(wx.Frame):
@@ -530,22 +482,25 @@ class Pie_ChartWindow(Base_GraphWindow):
 
         score_column_name = category_info[self.category]["series"][self.series_idx]
         if self.category == 6:
-            stats, count = customeyes.NPS_score_calc(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_title = role_title)
+            stats, count, nps_score = customeyes.NPS_score_calc(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_title = role_title)
         else:
             stats, count = customeyes.pie_chart_calc(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_title = role_title)
         question = category_info[self.category]["questions"][self.series_idx]
         
         title = question
-        if role_idx == 0:
-            title = "{:}\n{:} ({:} record(s))".format(question, "All Roles", count)
+        if self.category == 6:
+            if role_idx == 0:
+                title = "{:} {:}\n{:} ({:} record(s))".format(question, nps_score, "All Roles", count)
+            else:
+                title = "{:} {:}\n{:} ({:} record(s))".format(question, nps_score, role_title, count)            
         else:
-            title = "{:}\n{:} ({:} record(s))".format(question, role_title, count)
+            if role_idx == 0:
+                title = "{:}\n{:} ({:} record(s))".format(question, "All Roles", count)
+            else:
+                title = "{:}\n{:} ({:} record(s))".format(question, role_title, count)
 
         has_data = False
-        
-        if self.category == 6:
-            customeyes.draw_NPSplot(stats, title)
-            customeyes_plots.plt.show()            
+                  
         if len(stats) > 0:
             customeyes.draw_pieplot(stats, title)
             customeyes_plots.plt.show() 
