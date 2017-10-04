@@ -183,7 +183,7 @@ def create_month_axes(start_date, end_date):
     return stats
  
 #single and multi line
-def line_month_averages(data, date_column_name, score_column_names, stats = None, series_names = None, role_title = None, selected_roles = None, start_date = None, end_date = None):   
+def line_month_averages(data, date_column_name, score_column_names, stats = None, series_name = None, series_names = None, role_title = None, selected_roles = None, start_date = None, end_date = None):   
     if stats is None:
         stats = dict()
     if start_date is None:
@@ -224,18 +224,21 @@ def line_month_averages(data, date_column_name, score_column_names, stats = None
             if score is not None:    
                 if selected_roles is not None:
                     if series_name not in selected_roles[d[role_column_name]]:
-                        continue
-
+                        continue         
 
                 stats[month][series_name].append(score) 
 
     average_score_calc(stats)
-    
+
     for month in stats.keys():
+        if series_name is None:
+            for series_name in series_names:
+                if series_name not in stats[month]:
+                    stats[month][series_name] = None
         if series_name not in stats[month]:
             stats[month][series_name] = None
     
-    pprint.pprint(stats)
+    #pprint.pprint(stats)
     return stats
  
 def draw_lineplot(stats, date_column_name, score_column_name, title):

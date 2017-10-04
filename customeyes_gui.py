@@ -203,9 +203,9 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
         self.create_date_select(70)
 
         if self.button_id > 200 or len(category_info[self.category]["series"][self.series_idx]) == 1: 
-            self.tree = wx.dataview.TreeListCtrl(self.panel, -1, (15,140), (450,150), style = wx.TR_DEFAULT_STYLE)       
+            self.tree = wx.dataview.TreeListCtrl(self.panel, -1, (15,140), (450,150), style = wx.dataview.TL_CHECKBOX)       
         else:
-            self.tree = wx.dataview.TreeListCtrl(self.panel, -1, (15,140), (450,150), style = wx.TR_HAS_BUTTONS)  
+            self.tree = wx.dataview.TreeListCtrl(self.panel, -1, (15,140), (450,150), style = wx.dataview.TL_SINGLE)  
 
         # create some columns
         self.tree.AppendColumn("Technology")
@@ -237,7 +237,6 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
 
     def OnActivate(self, event):
         self.log.write('OnActivate: %s' % self.tree.GetItemText(event.GetItem()))
-
 
     def on_role_select(self,event):
         if self.button_id > 200:
@@ -306,24 +305,44 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
                                 stack.append(child)
                                 child = grandchild
                 item = self.tree.GetNextItem(item) 
-
-            pprint.pprint(selected_roles)
             
             customeyes.line_month_averages(app.data, date_column_name, series, start_date = start_date, end_date = end_date, stats = stats, selected_roles = selected_roles)
     
-    # TO DO: fix selection when it is a multi-line graph and set group to None if date exceeds data file
+    # TO DO: set group to None if date exceeds data file (=None in dictionary)
 
         else:
-            role_idx = self.rolelb.GetSelection()
-            if role_idx == 0:
+            item = self.tree.GetSelection()
+            selected_role = self.tree.GetItemText(item)
+            title = question
+
+            if item.IsOk():
+                if self.tree.IsSelected(item) is True:
+                    child = self.tree.GetFirstChild(item)
+                    if not child.IsOk():
+                        role_name = selected_role
+                    else:
+                        stack = list()
+                        if child.IsOk():
+                            grandchild = self.tree.GetFirstChild(child)
+                            if not grandchild.IsOk():
+                                role_name = selected_role
+                                child = self.tree.GetNextSibling(child)
+                                if not child.IsOk() and len(stack) > 0:
+                                    child = self.tree.GetNextSibling(stack.pop())
+                            else:
+                                stack.append(child)
+                                child = grandchild
+
+                item = self.tree.GetNextItem(item)
+
+            if role_name == "All Roles":
                 role_title = None
                 title = "{:}\n{:}".format(question, "All Roles")
             else:
-                role_title = app.roles[role_idx - 1]
+                role_title = role_name
                 title = "{:}\n{:}".format(question, role_title)
-            
 
-            customeyes.line_month_averages(app.data, date_column_name, series, start_date = start_date, end_date = end_date, stats = stats, series_name = labels, role_title = role_title)
+            customeyes.line_month_averages(app.data, date_column_name, series, start_date = start_date, end_date = end_date, stats = stats, series_names = labels, role_title = role_title)
 
         has_data = False
         
