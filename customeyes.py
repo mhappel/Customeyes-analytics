@@ -238,7 +238,6 @@ def line_month_averages(data, date_column_name, score_column_names, stats = None
         if series_name not in stats[month]:
             stats[month][series_name] = None
     
-    #pprint.pprint(stats)
     return stats
  
 def draw_lineplot(stats, date_column_name, score_column_name, title):
