@@ -5,10 +5,11 @@ import datetime
 import customeyes_plots
 import pprint
 
-role_prefix_blacklist = ["Accommodation Service Executive", "Commercial Owner", "Customer Service Executive", "Graduate Commercial Owner", 
+role_prefix_blacklist = ["Accommodation Service Executive", "Commercial Owner", "Customer Service Executive", "Graduate Commercial Owner", "Account Executive",
     "Operations Analyst - Translations and Content Agency", "Operations Coordinator - Freelance Recruitment", "Partner Marketing (CRM) (Marketing Database Specialist)",
     "Process Specialist Inbound", "Recruiter - Headquarters", "Seasonal Customer Relations Associate *Internal*", "Sourcer - Global Leadership", 
-    "Sr. Specialist Partner Marketing & Partner Activations", "Topic Specialist - Operations *Internal*", "Customer Service Business"]
+    "Sr. Specialist Partner Marketing & Partner Activations", "Topic Specialist - Operations *Internal*", "Customer Service Business", "Booking Home Support", "Market Manager", 
+    "Sr. Specialist Partner Marketing", "Regional Manager EMEA - Experiences", "Reporting Analyst", "Sr. Business Analyst - BookingSuite *INTERNAL*", "Booking Home Support Executive"]
 
 role_title_map = {
     "Back End Developers (Referrals only)":             "Back End Developer", 
@@ -55,6 +56,7 @@ role_title_map = {
     "(Event) Hackathon Munich":                         "Event - Hackathon - Munich",
     "(Event) Mexico Hackathon":                         "Event - Hackathon - Mexico",
     "(Event) Taipei Hackathon":                         "Event - Hackathon - Taipei",
+    "(Event) Front End Developer - South Africa":       "Event - South Africa - Front End Developer",
     "Taipei Software Developers":                       "Event - Hackathon - Taipei - Software Developer",
     "(Event) Technology Interview Day Guadalajara":     "Event - Technology Interview Day - Guadalajara",
     "(Event) Women in Tech Hackathon":                  "Event - Women in Tech - Hackathon",
@@ -66,6 +68,8 @@ role_title_map = {
     "E-commerce Copywriter":                            "Copywriter - E-commerce",
     "Employer Brand Copywriter":                        "Copywriter - Employer Brand",
     "UX Copywriter":                                    "Copywriter - UX",
+    "B2B Copywriter":                                   "Copywriter - B2B",
+    "Systems Engineer (MEC - ITS)":                     "Systems Engineer - Endpoints",
     }
 
 #loading data from Excel
@@ -78,15 +82,15 @@ def load_data():
     data = list()
     
     for col in range(s.ncols):
-        if s.cell(4,col).value != u"":
-            hdr = s.cell(4,col).value
+        if s.cell(0,col).value != u"":
+            hdr = s.cell(0,col).value
             headers[hdr] += 1
             
             if headers[hdr] > 1:
                 hdr = "{:}_{:}".format(hdr, headers[hdr])
             
             header_col_map[col] = hdr
-    for row in range(5,s.nrows):
+    for row in range(1,s.nrows):
         d = dict()
         for col in range(s.ncols):
             if s.cell(row,col).value != u"":
@@ -199,6 +203,7 @@ def line_month_averages(data, date_column_name, score_column_name, stats = None,
         if series_name not in stats[month]:
             stats[month][series_name] = None
     
+    pprint.pprint(stats)
     return stats
  
 def draw_lineplot(stats, date_column_name, score_column_name, title):
