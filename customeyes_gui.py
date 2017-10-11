@@ -66,7 +66,7 @@ category_info = {
                 "...is customer oriented",
                 "...is innovative",
                 "...is data driven",
-                "...getting things done every day",
+                "...is getting things done every day",
                 "...has a humble and open atmosphere",    
             ],
             [
@@ -95,7 +95,7 @@ category_info = {
             "\"Could you describe the degree of difficulty of the interviews?\"", 
             "\"I have the feeling that Booking.com acts fast\"",
             "\"The interviewers I communicated with...\"", 
-            "\"I think Booking.com is...\"", 
+            "\"I think Booking.com...\"", 
             "Feedback Quality",
             "Feedback on Booking.com Tech Blog",
             "\"Overal, I am satisfied with the interview(s) I had\"",
@@ -395,7 +395,7 @@ class Bar_GraphWindow(Base_GraphWindow):
         publishbtn = wx.Button(self.panel, -1, "Show Chart", (15,320))
         self.Bind(wx.EVT_BUTTON, self.On_publish_bar_chart, publishbtn)
 
-    def On_publish_bar_chart(self, event): #TO DO: Fix titles
+    def On_publish_bar_chart(self, event): 
             
         date_column_name = "Application Date"
         
