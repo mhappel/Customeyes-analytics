@@ -250,32 +250,38 @@ def draw_lineplot(stats, date_column_name, score_column_name, title):
         xlabel = "By {:}".format(date_column_name), bottom = 0, top = 10) 
         
 #bar charts               
-def hbar_role_averages(data, score_column_name = None, stats = None, start_date = None, end_date = None, series_name = None, role = "Requisition_Title", role_titles = None): 
+def hbar_role_averages(data, score_column_name = None, stats = None, start_date = None, end_date = None, series_name = None, selected_roles = None): 
     stats = dict()
     
     if start_date is None:
         start_date = datetime.date(2016,11,1)
+    
+    if selected_roles is not None:
+        series_names = set()
+        for target_names in selected_roles.values():
+            series_names.update(target_names)
 
-    if series_name is None:
-        series_name = role_titles or "All Roles"
     if score_column_name == "Degree difficulty interviews":
         score_parser = score_converter
     else:
         score_parser = score_strip
     
     for d in data:
-        if role_titles is not None and d[role] not in role_titles:
+        if selected_roles is not None and d[role_column_name] not in selected_roles:
             continue
         
         month = dates_setting(d,"Application Date")
         if month is None or month < start_date or (end_date is not None and month > end_date): 
             continue    
         
-        if d[role] not in stats:
-            stats[d[role]] = list()
+        
+        if d[role_column_name] not in stats:
+            stats[d[role_column_name]] = list()
         score = score_parser(d,score_column_name)    
         if score is not None:    
-            stats[d[role]].append(score) 
+            stats[d[role_column_name]].append(score) 
+
+
     
     for rt,scores in (stats.items()):
         record_count = len(scores)
@@ -283,6 +289,8 @@ def hbar_role_averages(data, score_column_name = None, stats = None, start_date 
             stats[rt] = (sum(scores)/record_count, record_count)
         else:
             del stats[rt]
+
+    #pprint.pprint(stats)
 
     return stats
             

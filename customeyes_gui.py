@@ -379,16 +379,38 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
             return
  
         question = category_info[self.category]["questions"][self.series_idx]
-
-        selected_roles = list()
-        title = question
-        for role_idx in self.rolelb.GetCheckedItems():
-            selected_roles.append(self.roles[role_idx])
-
         score_column_name = category_info[self.category]["series"][self.series_idx]
-        stats = customeyes.hbar_role_averages(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, role_titles = selected_roles)
+        title = question
         
-        has_data = False
+
+        item = self.tree.GetFirstItem()
+        selected_roles = dict()
+        title = question
+
+        while item.IsOk():
+            if self.tree.GetCheckedState(item) == 1:
+                child = self.tree.GetFirstChild(item)
+                if not child.IsOk():
+                    if self.tree.GetItemText(item) not in selected_roles:
+                        selected_roles[self.tree.GetItemText(item)] = list()
+                    selected_roles[self.tree.GetItemText(item)].append(self.tree.GetItemText(item))
+                else:
+                    stack = list()
+                    while child.IsOk():
+                        grandchild = self.tree.GetFirstChild(child)
+                        if not grandchild.IsOk():
+                            if self.tree.GetItemText(child) not in selected_roles:
+                                selected_roles[self.tree.GetItemText(child)] = list()
+                            selected_roles[self.tree.GetItemText(child)].append(self.tree.GetItemText(item))
+                            child = self.tree.GetNextSibling(child)
+                            while not child.IsOk() and len(stack) > 0:
+                                child = self.tree.GetNextSibling(stack.pop())
+                        else:
+                            stack.append(child)
+                            child = grandchild
+            item = self.tree.GetNextItem(item) 
+        
+        stats = customeyes.hbar_role_averages(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, selected_roles = selected_roles)
         
         if len(stats) > 0:
             customeyes.draw_hbarplot(stats, score_column_name, title)
