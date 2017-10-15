@@ -157,17 +157,23 @@ def average_score_calc(stats):
                     stats[month][series_name] = None
               
 #date calculators       
-def dates_setting(d,date_column_name):
+def dates_setting(d, date_column_name, parse_dashes = False):
     if date_column_name not in d: 
         return None
     if date_column_name in d:
-        day_month_format = date_column_name == "Rejection Date"
-        date_column = d[date_column_name]
+        if isinstance(d[date_column_name], list):
+            return datetime.date(d[date_column_name][0], d[date_column_name][1],1)
         try:
             dates = datetime.datetime.strptime(d[date_column_name],"%m/%d/%Y").date()
             return datetime.date(dates.year,dates.month,1)
         except ValueError:
-           return None 
+            if parse_dashes:
+                parts = d[date_column_name].split("-",3)
+                if len(parts) == 3:
+                    try:
+                        return datetime.date(int(parts[2]),int(parts[1]),1)
+                    except ValueError: pass
+        return None
 
 def create_month_axes(start_date, end_date):
     if end_date < start_date:
@@ -210,9 +216,9 @@ def line_month_averages(data, date_column_name, score_column_names, stats = None
         if month not in stats:
             stats[month] = dict()
 
-        for idx, series_name in enumerate(series_names):
-            if series_name not in stats[month]:
-                stats[month][series_name] = list()
+        for idx, sn in enumerate(series_names):
+            if sn not in stats[month]:
+                stats[month][sn] = list()
 
             score_column_name = score_column_names[idx]
             if score_column_name == "Degree difficulty interviews":
@@ -223,18 +229,18 @@ def line_month_averages(data, date_column_name, score_column_names, stats = None
             score = score_parser(d,score_column_name)    
             if score is not None:    
                 if selected_roles is not None:
-                    if series_name not in selected_roles[d[role_column_name]]:
+                    if sn not in selected_roles[d[role_column_name]]:
                         continue         
 
-                stats[month][series_name].append(score) 
+                stats[month][sn].append(score) 
 
     average_score_calc(stats)
 
     for month in stats.keys():
         if series_name is None:
-            for series_name in series_names:
-                if series_name not in stats[month]:
-                    stats[month][series_name] = None
+            for sn in series_names:
+                if sn not in stats[month]:
+                    stats[month][sn] = None
         if series_name not in stats[month]:
             stats[month][series_name] = None
     
@@ -250,7 +256,7 @@ def draw_lineplot(stats, date_column_name, score_column_name, title):
         xlabel = "By {:}".format(date_column_name), bottom = 0, top = 10) 
         
 #bar charts               
-def hbar_role_averages(data, score_column_name = None, stats = None, start_date = None, end_date = None, series_name = None, selected_roles = None): 
+def hbar_role_averages(data, date_column_name = None, score_column_name = None, stats = None, start_date = None, end_date = None, series_name = None, selected_roles = None): 
     stats = dict()
     
     if start_date is None:
@@ -270,19 +276,17 @@ def hbar_role_averages(data, score_column_name = None, stats = None, start_date 
         if selected_roles is not None and d[role_column_name] not in selected_roles:
             continue
         
-        month = dates_setting(d,"Application Date")
+        month = dates_setting(d,date_column_name)
         if month is None or month < start_date or (end_date is not None and month > end_date): 
             continue    
         
-        
-        if d[role_column_name] not in stats:
-            stats[d[role_column_name]] = list()
-        score = score_parser(d,score_column_name)    
-        if score is not None:    
-            stats[d[role_column_name]].append(score) 
+        for target_name in selected_roles.get(d[role_column_name]):
+            if target_name not in stats:
+                stats[target_name] = list()
+            score = score_parser(d,score_column_name)    
+            if score is not None:    
+                stats[target_name].append(score) 
 
-
-    
     for rt,scores in (stats.items()):
         record_count = len(scores)
         if record_count>0:

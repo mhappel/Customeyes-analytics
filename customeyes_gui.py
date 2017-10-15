@@ -88,6 +88,7 @@ category_info = {
         ],
     },
     2: {
+        "show_all": True,
         "series":
             ["Recruitment process","Degree difficulty interviews", "Fast application process"],
         "questions": [
@@ -238,7 +239,7 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
     def OnActivate(self, event):
         self.log.write('OnActivate: %s' % self.tree.GetItemText(event.GetItem()))
 
-    def on_role_select(self,event):
+    def on_role_select(self,event): #need to make this working with trees
         if self.button_id > 200:
             max_choice = 12
         else:
@@ -363,6 +364,11 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
             dlg.Destroy()
 
     def On_publish_hbar_chart(self,event):
+
+        if self.datesch.GetSelection() == 0:
+            date_column_name = "Application Date"
+        else:  
+            date_column_name = "Rejection Date"
              
         start_year = int(self.startyearch.GetStringSelection())
         start_month = self.startmonthch.GetSelection() + 1
@@ -409,8 +415,9 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
                             stack.append(child)
                             child = grandchild
             item = self.tree.GetNextItem(item) 
-        
-        stats = customeyes.hbar_role_averages(app.data, start_date = start_date, end_date = end_date, score_column_name = score_column_name, selected_roles = selected_roles)
+
+        pprint.pprint(selected_roles)
+        stats = customeyes.hbar_role_averages(app.data, start_date = start_date, end_date = end_date, date_column_name = date_column_name, score_column_name = score_column_name, selected_roles = selected_roles)
         
         if len(stats) > 0:
             customeyes.draw_hbarplot(stats, score_column_name, title)
