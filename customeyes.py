@@ -90,7 +90,7 @@ def load_data():
                 hdr = "{:}_{:}".format(hdr, headers[hdr])
             
             header_col_map[col] = hdr
-    for row in range(1,s.nrows):
+    for idx,row in enumerate(range(1,s.nrows)):
         d = dict()
         for col in range(s.ncols):
             if s.cell(row,col).value != u"":
@@ -99,6 +99,20 @@ def load_data():
             if d["Requisition_Title"].startswith(prefix):
                 d = None
                 break
+        
+        if d is not None:
+            app_date = dates_setting(d,"Application Date", parse_dashes = idx <= 158)
+            if app_date is None:
+                d = None
+            else:
+                d["Application Date"] = [app_date.year, app_date.month, app_date.day]
+        if d is not None:
+            rej_date = dates_setting(d, "Rejection Date", parse_dashes = idx <= 158)
+            if rej_date is None:
+                d = None
+            else:
+                d["Rejection Date"] = [rej_date.year, rej_date.month, rej_date.day]
+        
         if d is not None and len(d)>0:
             d["Requisition_Title"] = role_title_map.get(d["Requisition_Title"], d["Requisition_Title"])
 
@@ -144,18 +158,24 @@ def average_score_calc(stats):
                 else:
                     stats[month][series_name] = None
               
-#date calculators       
-def dates_setting(d,date_column_name):
+#date calculators   
+def dates_setting(d, date_column_name, parse_dashes = False):
     if date_column_name not in d: 
         return None
     if date_column_name in d:
-        day_month_format = date_column_name == "Rejection Date"
-        date_column = d[date_column_name]
+        if isinstance(d[date_column_name], list):
+            return datetime.date(d[date_column_name][0], d[date_column_name][1],1)
         try:
             dates = datetime.datetime.strptime(d[date_column_name],"%m/%d/%Y").date()
             return datetime.date(dates.year,dates.month,1)
         except ValueError:
-           return None 
+            if parse_dashes:
+                parts = d[date_column_name].split("-",3)
+                if len(parts) == 3:
+                    try:
+                        return datetime.date(int(parts[2]),int(parts[1]),1)
+                    except ValueError: pass
+        return None 
 
 def create_month_axes(start_date, end_date):
     if end_date < start_date:
@@ -203,7 +223,6 @@ def line_month_averages(data, date_column_name, score_column_name, stats = None,
         if series_name not in stats[month]:
             stats[month][series_name] = None
     
-    pprint.pprint(stats)
     return stats
  
 def draw_lineplot(stats, date_column_name, score_column_name, title):
