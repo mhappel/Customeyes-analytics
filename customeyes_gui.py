@@ -299,6 +299,9 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
                                 if self.tree.GetItemText(child) not in selected_roles:
                                     selected_roles[self.tree.GetItemText(child)] = list()
                                 selected_roles[self.tree.GetItemText(child)].append(self.tree.GetItemText(item))
+                                
+                                
+                                
                                 child = self.tree.GetNextSibling(child)
                                 while not child.IsOk() and len(stack) > 0:
                                     child = self.tree.GetNextSibling(stack.pop())
@@ -313,22 +316,30 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
 
         else:
             item = self.tree.GetSelection()
-            selected_role = self.tree.GetItemText(item)
+            role_name = self.tree.GetItemText(item)
+            selected_roles = dict()
             title = question
 
             if item.IsOk():
                 if self.tree.IsSelected(item) is True:
                     child = self.tree.GetFirstChild(item)
                     if not child.IsOk():
-                        role_name = selected_role
+                        role_name = role_name
                     else:
+                        #fix the group selection, gives no data available 
                         stack = list()
-                        if child.IsOk():
+                        while child.IsOk():
                             grandchild = self.tree.GetFirstChild(child)
+                            
                             if not grandchild.IsOk():
-                                role_name = selected_role
-                                child = self.tree.GetNextSibling(child)
-                                if not child.IsOk() and len(stack) > 0:
+                                if self.tree.GetItemText(child) not in selected_roles:
+                                    selected_roles[self.tree.GetItemText(child)] = list()
+                                selected_roles[self.tree.GetItemText(child)].append(self.tree.GetItemText(item))
+                                child = self.tree.GetNextSibling(child)                               
+
+                                print selected_roles
+
+                                while not child.IsOk() and len(stack) > 0:
                                     child = self.tree.GetNextSibling(stack.pop())
                             else:
                                 stack.append(child)

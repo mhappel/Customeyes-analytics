@@ -166,14 +166,14 @@ def dates_setting(d, date_column_name, parse_dashes = False):
         try:
             dates = datetime.datetime.strptime(d[date_column_name],"%m/%d/%Y").date()
             return datetime.date(dates.year,dates.month,1)
-        except ValueError:
+        except TypeError:
             if parse_dashes:
                 parts = d[date_column_name].split("-",3)
                 if len(parts) == 3:
                     try:
                         return datetime.date(int(parts[2]),int(parts[1]),1)
-                    except ValueError: pass
-        return None
+                    except TypeError: pass
+        return None 
 
 def create_month_axes(start_date, end_date):
     if end_date < start_date:
@@ -244,6 +244,8 @@ def line_month_averages(data, date_column_name, score_column_names, stats = None
         if series_name not in stats[month]:
             stats[month][series_name] = None
     
+    pprint.pprint(stats)
+
     return stats
  
 def draw_lineplot(stats, date_column_name, score_column_name, title):
