@@ -103,13 +103,13 @@ def load_data():
         if d is not None:
             app_date = dates_setting(d,"Application Date", parse_dashes = idx <= 158)
             if app_date is None:
-                d = None
+                d["Application Date"] = None
             else:
                 d["Application Date"] = [app_date.year, app_date.month, app_date.day]
         if d is not None:
             rej_date = dates_setting(d, "Rejection Date", parse_dashes = idx <= 158)
             if rej_date is None:
-                d = None
+                d["Rejection Date"] = None
             else:
                 d["Rejection Date"] = [rej_date.year, rej_date.month, rej_date.day]
         
@@ -168,13 +168,13 @@ def dates_setting(d, date_column_name, parse_dashes = False):
         try:
             dates = datetime.datetime.strptime(d[date_column_name],"%m/%d/%Y").date()
             return datetime.date(dates.year,dates.month,1)
-        except ValueError:
+        except TypeError:
             if parse_dashes:
                 parts = d[date_column_name].split("-",3)
                 if len(parts) == 3:
                     try:
                         return datetime.date(int(parts[2]),int(parts[1]),1)
-                    except ValueError: pass
+                    except TypeError: pass
         return None 
 
 def create_month_axes(start_date, end_date):

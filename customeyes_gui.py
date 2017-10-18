@@ -160,7 +160,7 @@ category_info = {
 #    "\"The job offer letter was clear to me\"",
 
 # questions to be answered:
-#    "\"Overal, I am satisfied with the interview(s) I had\"" => Made a graph per stage, but there is no column with this actual data.
+#    "\"Overall, I am satisfied with the interview(s) I had\"" => Made a graph per stage, but there is no column with this actual data.
     
 # questions not yet answered in graphs: 
 #    "\"It was clear to me what I could expect from the application procedure\"", "\"How many rounds of interviews have you had in total?\"", 
