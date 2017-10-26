@@ -323,10 +323,8 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
             if item.IsOk():
                 if self.tree.IsSelected(item) is True:
                     child = self.tree.GetFirstChild(item)
-                    if not child.IsOk():
-                        role_name = role_name
-                    else:
-                        #fix the group selection, gives no data available 
+                    if child.IsOk():
+
                         stack = list()
                         while child.IsOk():
                             grandchild = self.tree.GetFirstChild(child)
@@ -337,8 +335,6 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
                                 selected_roles[self.tree.GetItemText(child)].append(self.tree.GetItemText(item))
                                 child = self.tree.GetNextSibling(child)                               
 
-                                print selected_roles
-
                                 while not child.IsOk() and len(stack) > 0:
                                     child = self.tree.GetNextSibling(stack.pop())
                             else:
@@ -347,6 +343,9 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
 
                 item = self.tree.GetNextItem(item)
 
+            role_group = set(selected_roles.keys())
+            print role_group
+
             if role_name == "All Roles":
                 role_title = None
                 title = "{:}\n{:}".format(question, "All Roles")
@@ -354,7 +353,7 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
                 role_title = role_name
                 title = "{:}\n{:}".format(question, role_title)
 
-            customeyes.line_month_averages(app.data, date_column_name, series, start_date = start_date, end_date = end_date, stats = stats, series_names = labels, role_title = role_title)
+            customeyes.line_month_averages(app.data, date_column_name, series, start_date = start_date, end_date = end_date, stats = stats, series_names = labels, role_group = role_group, role_title = role_title)
 
         has_data = False
         

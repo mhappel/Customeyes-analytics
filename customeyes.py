@@ -189,7 +189,7 @@ def create_month_axes(start_date, end_date):
     return stats
  
 #single and multi line
-def line_month_averages(data, date_column_name, score_column_names, stats = None, series_name = None, series_names = None, role_title = None, selected_roles = None, start_date = None, end_date = None):   
+def line_month_averages(data, date_column_name, score_column_names, stats = None, series_name = None, series_names = None, role_title = None, role_group = None, selected_roles = None, start_date = None, end_date = None):   
     if stats is None:
         stats = dict()
     if start_date is None:
@@ -207,6 +207,8 @@ def line_month_averages(data, date_column_name, score_column_names, stats = None
                 continue
         else:
             if role_title is not None and d[role_column_name] != role_title:
+                continue
+            elif role_group is not None and d[role_column_name] not in role_group:
                 continue
         
         month = dates_setting(d,date_column_name)
