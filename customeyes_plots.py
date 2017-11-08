@@ -29,35 +29,7 @@ def pieplot(stats, title, data_label=None):
     ax1.set_title(title)
     
   
-def hbarplot(stats, title, sort_key=None, data_label=None, xlabel=None, ylabel=None, right=None, left=None):
-    plt.rcdefaults()
-    fig, ax = plt.subplots()
-
-    labels = list()
-    buckets = list()
-    
-    for k,(v,c) in sorted(stats.items(), key = sort_key):
-        if data_label is not None:
-            k = data_label(k)
-        labels.append("{:} ({:} record(s))".format(k,c))
-        buckets.append(v)
-
-    y_pos = np.arange(len(labels))
-    
-    if left is None:
-        left = min(buckets)*0.90
-    if right is None:
-        right = max(buckets)*1.11
-    ax.set_xlim(left=left, right=right, emit=True, auto=False)
-    
-    ax.barh(y_pos, buckets, align="center", color="blue", ecolor="black")
-    ax.set_yticks(y_pos)
-    ax.set_yticklabels(labels, ha = "right", va = "center", wrap = True )
-    #ax.invert_yaxis()  # labels read top-to-bottom
-    ax.set_xlabel(xlabel)
-    ax.set_title(title)
-           
-#TO DO: build stats differently in customeyes.py
+     
 def multibarplot(stats, title, xlabel=None, ylabel=None, data_label=None, bar_width=0.75, sort_key=None, bottom=None, top=None):
     labels = list()
     buckets = list()

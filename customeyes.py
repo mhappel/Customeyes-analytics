@@ -11,67 +11,6 @@ role_prefix_blacklist = ["Accommodation Service Executive", "Commercial Owner", 
     "Sr. Specialist Partner Marketing & Partner Activations", "Topic Specialist - Operations *Internal*", "Customer Service Business", "Booking Home Support", "Market Manager", 
     "Sr. Specialist Partner Marketing", "Regional Manager EMEA - Experiences", "Reporting Analyst", "Sr. Business Analyst - BookingSuite *INTERNAL*", "Booking Home Support Executive"]
 
-role_title_map = {
-    "Back End Developers (Referrals only)":             "Back End Developer", 
-    "Back End Developers / Referrals":                  "Back End Developer",
-    "Software Developer (Headhunts only)":              "Back End Developer",
-    "Software Developer- Headhunts only":               "Back End Developer",
-    "Software Engineer":                                "Back End Developer",
-    "Perl Developer":                                   "Back End Developer",
-    "Software Developer":                               "Back End Developer",
-    "Sr. Software Engineer":                            "Sr. Software Developer",
-    "Business Applications Specialist":                 "IT Business Applications Engineer",
-    "Enterprise Applications Developer":                "IT Business Applications Engineer",
-    "Enterprise Applications Developer (BusApps - ITS)":"IT Business Applications Engineer",
-    "Front End Developer (Headhunts only)":             "Front End Developer",
-    "Front End Developer *Headhunts*":                  "Front End Developer",
-    "IT Business Applications Specialist":              "IT Business Applications Engineer",
-    "Data Center Engineer - UK (Netw - CoreInfra)":     "Data Center Engineer - UK",
-    "Data Scientist Machine Learning":                  "Data Scientist - Machine Learning",
-    "Data Scientist - General (Headhunts only)":        "Data Scientist - General",
-    "Data Scientist Online Advertising":                "Data Scientist - Online Advertising",
-    "IT Support Desk Technician - Berlin (Support - ITS)": "IT Support Desk Technician - Berlin",
-    "Internship User Research":                         "Internship - User Research",
-    "Network Engineer (Netw - CoreInfra)":              "Network Engineer",
-    "Network Tools Developer (NetOffices - ITS)":       "Network Tools Developer - IT Services",
-    "Network Tools and Automation Engineer (NetOffices - ITS)": "Network Tools Developer - IT Services",
-    "Product Owner E-commerce (Referrals only)":        "Product Owner E-commerce",
-    "Referral Product Owner E-commerce":                "Product Owner E-commerce",
-    "Product Owner - People Development":               "Product Owner People Development",
-    "Product Owner - New Product Development":          "Product Owner New Product Development",
-    "Product Owner - Localization (Japan)":             "Product Owner Localization (Japan)",
-    "Product Owner - Authorization & Authentication":   "Product Owner Authorization & Authentication",
-    "Network Security Product Owner":                   "Product Owner Network Security",
-    "Network Tech Product Owner":                       "Product Owner Network Technology",
-    "Sr. Devops Engineer (Monitoring - ITS)":           "Sr. Devops Engineer",
-    "Sr. Software Engineer":                            "Sr. Software Developer",
-    "Systems Engineer (Platform - ITS)":                "Systems Engineer - Platform",
-    "UX Designer (Headhunts only)":                     "UX Designer",
-    "UX Designer - Headhunts only":                     "UX Designer",
-    "Mobile App Designer":                              "Designer Mobile App",
-    "Wireless Network Engineer (NetOffices - ITS)":     "Wireless Network Engineer",
-    "(Event - Women in Tech) UX Designer":              "Event - Women in Tech - UX Designer",
-    "(Event) Assessment Days Mexico City":              "Event - Assessment Day - Mexico City",
-    "(Event) Copywriters - Women in Tech Hackathon":    "Event - Women in Tech - Hackathon - Copywriters",
-    "(Event) Hackathon Munich":                         "Event - Hackathon - Munich",
-    "(Event) Mexico Hackathon":                         "Event - Hackathon - Mexico",
-    "(Event) Taipei Hackathon":                         "Event - Hackathon - Taipei",
-    "(Event) Front End Developer - South Africa":       "Event - South Africa - Front End Developer",
-    "Taipei Software Developers":                       "Event - Hackathon - Taipei - Software Developer",
-    "(Event) Technology Interview Day Guadalajara":     "Event - Technology Interview Day - Guadalajara",
-    "(Event) Women in Tech Hackathon":                  "Event - Women in Tech - Hackathon",
-    "(Event) Women in Tech: Front End Developer":       "Event - Women in Tech - Front End Developer",
-    "Assessment day South Africa":                      "Event - Assessment Day - South Africa",
-    "HACK WITH PRIDE":                                  "Event - Hackathon - Hack With Pride",
-    "Hack a Holiday - Manila Edition":                  "Event - Hackathon - Manila",
-    "Product Owner (Women in Tech)":                    "Event - Women in Tech - Product Owner",
-    "E-commerce Copywriter":                            "Copywriter - E-commerce",
-    "Employer Brand Copywriter":                        "Copywriter - Employer Brand",
-    "UX Copywriter":                                    "Copywriter - UX",
-    "B2B Copywriter":                                   "Copywriter - B2B",
-    "Systems Engineer (MEC - ITS)":                     "Systems Engineer - Endpoints",
-    }
-
 #loading data from Excel
 def load_data():
     wb = open_workbook("report.xlsx")
@@ -197,16 +136,15 @@ def line_month_averages(data, date_column_name, score_column_name, stats = None,
     if start_date is None:
         start_date = datetime.date(2016,11,1)
     if series_name is None:
-        series_name = role_title or "All Roles"
+        series_name = "All Roles"
+
     if score_column_name == "Degree difficulty interviews":
         score_parser = score_converter
     else:
         score_parser = score_strip
     
     for d in data:
-        if role_title is not None and d[roles] != role_title:
-            continue
-        month = dates_setting(d,date_column_name)
+        month = dates_setting(d,"Application Date")
 
         if month is None or month < start_date or (end_date is not None and month > end_date): 
             continue
@@ -234,52 +172,7 @@ def draw_lineplot(stats, date_column_name, score_column_name, title):
     customeyes_plots.lineplot(stats, "{:}".format(title), ylabel = "From {:} (0) to {:} (10)".format(*ylabels), 
         xlabel = "By {:}".format(date_column_name), bottom = 0, top = 10) 
         
-#bar charts               
-def hbar_role_averages(data, score_column_name = None, stats = None, start_date = None, end_date = None, series_name = None, role = "Requisition_Title", role_titles = None): 
-    stats = dict()
-    
-    if start_date is None:
-        start_date = datetime.date(2016,11,1)
-
-    if series_name is None:
-        series_name = role_titles or "All Roles"
-    if score_column_name == "Degree difficulty interviews":
-        score_parser = score_converter
-    else:
-        score_parser = score_strip
-    
-    for d in data:
-        if role_titles is not None and d[role] not in role_titles:
-            continue
-        
-        month = dates_setting(d,"Application Date")
-        if month is None or month < start_date or (end_date is not None and month > end_date): 
-            continue    
-        
-        if d[role] not in stats:
-            stats[d[role]] = list()
-        score = score_parser(d,score_column_name)    
-        if score is not None:    
-            stats[d[role]].append(score) 
-    
-    for rt,scores in (stats.items()):
-        record_count = len(scores)
-        if record_count>0:
-            stats[rt] = (sum(scores)/record_count, record_count)
-        else:
-            del stats[rt]
-
-    return stats
             
-def draw_hbarplot(stats, score_column_name, title):
-    if score_column_name == "Degree difficulty interviews":
-        xlabels = ("Very Easy", "Very Difficult")
-    else:
-        xlabels = ("Strongly Disagree", "Strongly Agree")
-    
-    customeyes_plots.hbarplot(stats, "{:}".format(title), xlabel = "From {:} (0) to {:} (10)".format(*xlabels), sort_key = lambda (k,(v,c)): v, left = 0, right = 10) 
-
-#TO DO: insert data selection possibility and graphs per role and choice between source and completion status
 def barchart_average_scores(data, score_column_name = None, stats = None, start_date = None, end_date = None, roles = "Requisition_Title", series_name = None, x_series = None, role_title = None):    
     stats = dict()
 
