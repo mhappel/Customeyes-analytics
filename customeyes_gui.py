@@ -169,7 +169,7 @@ class Base_GraphWindow(wx.Frame):
         self.startmonthch.SetSelection(10)
         self.Bind(wx.EVT_CHOICE, self.on_parameter_change, self.startmonthch)
         
-        end_date = datetime.date.today()
+        end_date = datetime.date(2017,9,1)
         
         year_choices = list()
         year = 2016
@@ -225,6 +225,12 @@ class Line_Hbar_GraphWindow(Base_GraphWindow):
             dlg.ShowModal()
             dlg.Destroy()
             return
+
+        if start_date < datetime.date(2016,11,1):
+            dlg = wx.MessageDialog(self, "Data before November 2016 not reliable enough to display", "Alert", wx.OK | wx.ICON_EXCLAMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+            return
         
         stats = customeyes.create_month_axes(start_date, end_date)
         
@@ -277,8 +283,6 @@ class Bar_GraphWindow(Base_GraphWindow):
         self.choicech.SetSelection(0)
         self.Bind(wx.EVT_CHOICE, self.on_parameter_change, self.choicech)
       
-        self.roles = ["All"] 
-
         publishbtn = wx.Button(self.panel, -1, "Show Chart", (15,140))
         self.Bind(wx.EVT_BUTTON, self.On_publish_bar_chart, publishbtn)
 
@@ -297,7 +301,6 @@ class Bar_GraphWindow(Base_GraphWindow):
         x_series = category_info[self.category]["series"][self.choicech.GetSelection()]
         question = category_info[self.category]["questions"][self.series_idx]
         series_label = category_info[self.category]["series_labels"][self.choicech.GetSelection()]
-
   
         if start_date > end_date:
             dlg = wx.MessageDialog(self, "Cannot select End Date before Start Date.", "Alert", wx.OK | wx.ICON_EXCLAMATION)                              
@@ -305,6 +308,12 @@ class Bar_GraphWindow(Base_GraphWindow):
             dlg.Destroy()
             return
         
+        if start_date < datetime.date(2016,11,1):
+            dlg = wx.MessageDialog(self, "Data before November 2016 not reliable enough to display", "Alert", wx.OK | wx.ICON_EXCLAMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+            return
+
         role_title = None
         title = "{:}\n{:} for {:}".format(question, series_label, "All Roles")
 
@@ -327,10 +336,7 @@ class Pie_ChartWindow(Base_GraphWindow):
         super(Pie_ChartWindow, self).__init__(parent, ID, title, button_id, pos, size, style)
 
         self.create_date_select(35) 
-      
-        self.roles = ["All"]
 
-    
         publishbtn = wx.Button(self.panel, -1, "Show Chart", (15,105))
         self.Bind(wx.EVT_BUTTON, self.On_publish_pie_chart, publishbtn)
 
@@ -352,6 +358,12 @@ class Pie_ChartWindow(Base_GraphWindow):
             dlg.Destroy()
             return
  
+        if start_date < datetime.date(2016,11,1):
+            dlg = wx.MessageDialog(self, "Data before November 2016 not reliable enough to display", "Alert", wx.OK | wx.ICON_EXCLAMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+            return
+
         role_title = None
 
         score_column_name = category_info[self.category]["series"][self.series_idx]
@@ -384,7 +396,7 @@ class Histo_Window(Base_GraphWindow):
 
         self.create_date_select(35) 
         
-        publishbtn = wx.Button(self.panel, -1, "Show Chart", (15,320))
+        publishbtn = wx.Button(self.panel, -1, "Show Chart", (15,105))
         self.Bind(wx.EVT_BUTTON, self.On_publish_histogram, publishbtn)
 
     def On_publish_histogram(self, event):
@@ -405,6 +417,12 @@ class Histo_Window(Base_GraphWindow):
             dlg.Destroy()
             return
  
+        if start_date < datetime.date(2016,11,1):
+            dlg = wx.MessageDialog(self, "Data before November 2016 not reliable enough to display", "Alert", wx.OK | wx.ICON_EXCLAMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+            return
+
         role_title = None
 
         score_column_name = category_info[self.category]["series"][self.series_idx]
@@ -457,8 +475,6 @@ class MyFrame(wx.Frame):
         # and a menu 
         menu1 = wx.Menu()
         
-        menu1.Append(101, "&Update Data", "Will load and update a new raw data file")
-        menu1.AppendSeparator()
         menu1.Append(110, "E&xit\tAlt-X", "Exit")
         menuBar.Append(menu1, "&File")
 
