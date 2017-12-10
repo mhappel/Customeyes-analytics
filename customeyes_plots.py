@@ -1,7 +1,9 @@
 import pprint
 import collections
-import matplotlib.dates as mdates
 import numpy as np
+import matplotlib
+matplotlib.use('WXAgg')
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 styles = [
     "b.-",
